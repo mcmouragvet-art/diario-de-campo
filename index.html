@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diário de Campo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --ink:#1d2721; --ink2:#47524b; --muted:#78827c; --line:#e6e1d6;
+  --brand:#2e6a4e; --brand-ink:#ffffff; --soft:#e2eee6; --warm:#fbefdc; --warm-ink:#94591a;
+  --danger:#b3412f; --shadow:0 1px 2px rgba(30,40,30,.06),0 4px 14px rgba(30,40,30,.06);
+  --t1:#2e6a4e; --t2:#b3412f; --t3:#2f6fa8; --t4:#1f8a8a; --t5:#7b52a8; --t6:#b97716; --t7:#6c7d2a; --t8:#7a7a7a;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#121714; --card:#1b221e; --ink:#eaefeb; --ink2:#c3ccc6; --muted:#8f9a94; --line:#2b342f;
+  --brand:#74c49b; --brand-ink:#0f2219; --soft:#22342a; --warm:#3a2d1b; --warm-ink:#f0bb72; --danger:#ec8573; --shadow:none;
+  --t1:#74c49b; --t2:#ec8573; --t3:#76aee0; --t4:#6cc9c9; --t5:#bb95e0; --t6:#e7b061; --t7:#b6c66a; --t8:#a3a3a3;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 104px)}
+.hello{font-family:Fraunces,serif;font-weight:600;font-size:28px;margin:2px 0 0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:15px;margin:2px 0 0;text-transform:capitalize}
+.status{font-size:12px;color:var(--muted);margin-top:4px}
+.status.warn{color:var(--warm-ink)}
+h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:26px 2px 10px}
+.card{background:var(--card);border-radius:18px;padding:6px 16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.pad{padding:16px}
+.muted{color:var(--muted)} .small{font-size:14px} .tiny{font-size:12px}
+.row{display:flex;gap:10px;align-items:center} .between{justify-content:space-between} .grow{flex:1;min-width:0}
+.hidden{display:none!important}
+
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav .in{display:flex;max-width:560px;margin:0 auto}
+nav button{flex:1;background:none;border:0;padding:10px 2px 12px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative}
+nav button svg{width:26px;height:26px}
+nav button.on{color:var(--brand);font-weight:700}
+.badge{position:absolute;top:5px;left:calc(50% + 6px);background:var(--danger);color:#fff;font-size:11px;font-weight:700;border-radius:999px;min-width:19px;height:19px;padding:0 5px;display:flex;align-items:center;justify-content:center}
+
+/* buttons */
+.btn{border:0;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;background:var(--brand);color:var(--brand-ink);min-height:52px}
+.btn.soft{background:var(--soft);color:var(--brand)}
+.btn.line{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.btn.danger{background:none;color:var(--danger);border:1px solid var(--danger)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.link{color:var(--brand);font-weight:600;text-decoration:none;background:none;border:0;padding:6px 0;cursor:pointer;font-size:15px}
+
+/* farm grid */
+.farms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.farm{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:14px;text-align:left;cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.farm:active{transform:scale(.98)}
+.farm .pin{width:30px;height:30px;border-radius:10px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.farm .pin svg{width:18px;height:18px}
+.farm b{font-size:16px;line-height:1.2;display:block}
+.farm span{font-size:13px;color:var(--muted)}
+.farm.add{border-style:dashed;box-shadow:none;background:transparent;align-items:center;justify-content:center;color:var(--brand);font-weight:700;text-align:center}
+.flag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--warm-ink);background:var(--warm);border-radius:999px;padding:2px 8px}
+
+/* entries */
+.entry{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line);cursor:pointer}
+.card > .entry:first-child,.card > div:first-child > .entry:first-child{border-top:0}
+.entry .bar{width:5px;border-radius:5px;flex:none}
+.entry .place{font-weight:700}
+.entry .t{font-size:14px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.entry .desc{font-size:15px;color:var(--ink2);margin-top:4px;white-space:pre-wrap}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;margin-top:6px}
+.saida{margin-top:10px;background:var(--soft);color:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:15px}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:15px}
+.daytitle{font-weight:700;font-size:14px;text-transform:capitalize;margin:16px 0 0;color:var(--brand)}
+
+/* checklist */
+.check{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}
+.card > .check:first-child{border-top:0}
+.cb{width:30px;height:30px;flex:none;border-radius:9px;border:2px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent}
+.cb.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.cb svg{width:18px;height:18px}
+.check .txt{flex:1;min-width:0;padding-top:3px;white-space:pre-wrap}
+.check.done .txt{text-decoration:line-through;color:var(--muted)}
+.check .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+.mini{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.mini button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 11px;font-size:14px;font-weight:600;cursor:pointer}
+.mini button.pri,.mini a.pri{background:var(--soft);border-color:transparent;color:var(--brand)}
+.mini a{border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:14px;font-weight:600;text-decoration:none;color:var(--ink)}
+:root{--f0:#1D9E75;--f1:#378ADD;--f2:#D85A30;--f3:#7F77DD;--f4:#BA7517;--f5:#D4537E;--f6:#639922;--f7:#888780;--f8:#E24B4A;--f9:#0F6E56;--t9:#993556}
+@media (prefers-color-scheme: dark){:root{--f0:#5DCAA5;--f1:#85B7EB;--f2:#F0997B;--f3:#AFA9EC;--f4:#EF9F27;--f5:#ED93B1;--f6:#97C459;--f7:#B4B2A9;--f8:#F09595;--f9:#9FE1CB;--t9:#ED93B1}}
+.fdot{width:14px;height:14px;border-radius:50%;flex:none;display:inline-block}
+.farmlist{display:flex;flex-direction:column;gap:8px}
+.frow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;text-align:left;width:100%;min-height:62px;box-shadow:var(--shadow)}
+.frow:active{transform:scale(.99)}
+.frow b{font-size:16px} .frow .s{font-size:13px;color:var(--muted)}
+.frow.add{border-style:dashed;box-shadow:none;background:transparent;color:var(--brand);font-weight:700;justify-content:center}
+.hero{background:var(--card);border:2px solid var(--brand);border-radius:22px;padding:18px;margin-top:16px;box-shadow:var(--shadow)}
+.hero .k{font-size:13px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
+.hero .ti1{font-size:21px;font-weight:700;margin:6px 0 2px;line-height:1.25}
+.hero .ti2{color:var(--muted);font-size:15px}
+.big{width:100%;margin-top:14px;font-size:18px;min-height:60px;border-radius:16px}
+.stop{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.stop:first-of-type{border-top:0}
+.stop .n{width:28px;height:28px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+.stop.done .nm{text-decoration:line-through;color:var(--muted)}
+.stop .act{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:15px;background:var(--soft);color:var(--brand);white-space:nowrap}
+.stop.next .act{background:var(--brand);color:var(--brand-ink)}
+.stop .act.out{background:var(--warm);color:var(--warm-ink)}
+.cores{display:flex;gap:10px;flex-wrap:wrap}
+.cores button{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0}
+.cores button.on{border-color:var(--ink)}
+.pchips{display:flex;flex-direction:column;gap:6px}
+.pchip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;font-weight:600;min-height:48px}
+.pchip.on{border-color:var(--brand);background:var(--soft)}
+.pchip .ord{margin-left:auto;font-weight:700;color:var(--brand)}
+.itens{display:flex;flex-direction:column;gap:6px}
+.item{display:flex;gap:12px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:13px;padding:10px 12px;font-weight:600;font-size:16px;text-align:left;cursor:pointer;min-height:52px}
+.item .cb{width:26px;height:26px;pointer-events:none}
+.item.on{border-color:var(--brand);background:var(--soft)}
+.feitos{font-size:14px;color:var(--ink2);margin-top:6px;line-height:1.5}
+.feitos span{display:inline-block;margin-right:10px;white-space:nowrap}
+.agtime{font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand);margin-right:6px}
+.result{margin-top:12px;background:var(--card);border:1px solid var(--brand);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.result .t1{font-weight:700;color:var(--brand)}
+.result .t2{font-size:17px;font-weight:600;margin:4px 0 2px}
+.x{background:none;border:0;color:var(--muted);padding:4px 6px;cursor:pointer;font-size:20px;line-height:1}
+
+/* dump */
+.dump textarea{min-height:110px;font-size:17px}
+.mic{font-size:13px;color:var(--muted);margin:8px 2px 0}
+
+/* forms */
+label{display:block;font-size:14px;color:var(--ink2);margin:16px 0 6px;font-weight:600}
+input,select,textarea{width:100%;font:inherit;font-size:17px;padding:13px 14px;border-radius:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:50px}
+textarea{min-height:90px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:13px 12px;text-align:left;font-weight:600;font-size:15px;cursor:pointer;display:flex;gap:10px;align-items:center;min-height:58px;line-height:1.2}
+.type .dot{width:12px;height:12px;border-radius:50%;flex:none}
+.type.on{border-color:var(--brand);background:var(--soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.type:active{transform:scale(.98)}
+
+/* sheets */
+.sheet{position:fixed;inset:0;background:rgba(10,15,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.sheet.open{display:flex}
+.sheet .panel{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 20px);animation:up .22s ease}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:21px;margin:0}
+.close{background:var(--bg);border:0;border-radius:999px;width:38px;height:38px;font-size:20px;cursor:pointer;color:var(--ink2)}
+
+/* farm detail */
+.back{display:flex;align-items:center;gap:4px;background:none;border:0;color:var(--brand);font-weight:700;padding:6px 0;cursor:pointer;font-size:16px}
+.fhead h1{font-family:Fraunces,serif;font-weight:600;font-size:27px;margin:8px 0 2px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin:18px 0 4px;gap:4px}
+.seg button{flex:1;border:0;background:none;border-radius:10px;padding:11px 4px;font-weight:600;font-size:15px;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--brand);color:var(--brand-ink)}
+.addrow{display:flex;gap:8px;margin:12px 0}
+.addrow input{flex:1}
+.addrow .btn{min-width:56px;padding:0 16px;font-size:22px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:13px;color:var(--muted)}
+.hbar{margin:12px 0}
+.hbar .lbl{display:flex;justify-content:space-between;gap:8px;font-size:15px;margin-bottom:5px}
+.hbar .track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden}
+.hbar .fill{height:100%;border-radius:0 4px 4px 0}
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav button{width:50px;height:50px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:24px;cursor:pointer}
+.weeknav .w{text-align:center;font-weight:700}
+
+/* chart */
+.chart{margin:6px 0 2px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .cap{font-size:14px;color:var(--ink2);min-height:20px;margin-top:2px;font-variant-numeric:tabular-nums}
+table.tb{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+table.tb th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:8px 4px;border-bottom:1px solid var(--line)}
+table.tb td{padding:10px 4px;border-bottom:1px solid var(--line)}
+table.tb td.n,table.tb th.n{text-align:right}
+.over{color:var(--danger);font-weight:700}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+pre.report{white-space:pre-wrap;font:inherit;font-size:14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;max-height:50vh;overflow:auto;user-select:text}
+.tip{background:var(--soft);border-radius:16px;padding:14px 16px;font-size:15px;line-height:1.45;color:var(--ink2)}
+.tip b{color:var(--brand)}
+.alert{background:var(--warm);color:var(--warm-ink);border-radius:16px;padding:14px 16px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:12px;border:0;width:100%;text-align:left;font-size:16px}
+
+/* diário */
+.ditem{display:flex;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.card > .ditem:first-child{border-top:0}
+.ditem .ico{font-size:19px;line-height:1.3;flex:none;width:24px;text-align:center}
+.ditem .tt{font-weight:600;white-space:pre-wrap}
+.ditem .ss{font-size:14px;color:var(--muted);margin-top:3px;white-space:pre-wrap}
+.ditem.click{cursor:pointer}
+mark{background:var(--warm);color:var(--ink);border-radius:3px;padding:0 1px}
+#scroller{position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html,body{height:100%;overflow:hidden}
+/* mantém a barra visível quando o app abre numa moldura maior que a tela */
+:root{--clip:0px}
+nav,#scroller,.sheet{bottom:var(--clip)}
+.toast{bottom:calc(env(safe-area-inset-bottom) + 92px + var(--clip))}
+html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
+#vpProbe{position:fixed;inset:0;visibility:hidden;pointer-events:none}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Diário">
+<meta name="theme-color" content="#1f5c3d">
+</head>
+<body>
+<div id="scroller"><div class="wrap">
+
+  <!-- ============ INÍCIO ============ -->
+  <section id="v-inicio">
+    <p class="hello" id="hello">Olá, Maria Clara</p>
+    <p class="sub" id="hoje" style="text-transform:none"></p>
+    <div class="status" id="status">Conectando…</div>
+    <div id="hero"></div>
+    <div id="alertas"></div>
+
+    <div id="agHojeBox" class="hidden"><h2>Também hoje</h2><div class="card" id="agHoje"></div></div>
+
+    <div id="escBox" class="hidden"><h2>No escritório?</h2><div id="escGrid"></div></div>
+
+    <h2 id="gridTitle">Em qual fazenda você está?</h2>
+    <div class="farmlist" id="farmGrid"></div>
+
+    <h2>Hoje</h2>
+    <div class="card" id="listaHoje"></div>
+  </section>
+
+  <!-- ============ AGENDA ============ -->
+  <section id="v-agenda" class="hidden">
+    <p class="hello">Agenda</p>
+    <p class="sub" style="text-transform:none">Escreva em “Anotar” do jeito que falaria — o compromisso vem pra cá sozinho.</p>
+    <button class="btn soft block" id="agNovo" style="margin-top:16px">+ Novo compromisso</button>
+    <div id="agLista"></div>
+    <button class="link hidden" id="agToggle" style="margin:14px 2px">Ver anteriores</button>
+    <div id="agPassados" class="hidden"></div>
+  </section>
+
+  <!-- ============ ANOTAR ============ -->
+  <section id="v-anotar" class="hidden">
+    <p class="hello">Anotar</p>
+    <p class="sub" style="text-transform:none">Tirou da cabeça, tá guardado. Se tiver data, vai pra agenda. Se já fez, vai pro diário.</p>
+    <div class="card pad dump" style="margin-top:16px">
+      <textarea id="dumpTxt" placeholder="Ex.: segunda que vem vou à fazenda do Polidoro com o Lucas · ou: quinta entregas no Alexandre, Dinho e Jacques · ou: hoje fiz CMT na Fazenda do Lago"></textarea>
+      <div class="mic">🎙️ Dica: toque no microfone do teclado para ditar em vez de digitar.</div>
+      <button class="btn block" id="dumpSave" style="margin-top:12px">Guardar</button>
+    </div>
+    <div id="dumpResult"></div>
+    <h2 id="dumpTitle">Para resolver</h2>
+    <div class="card" id="dumpList"></div>
+    <button class="link hidden" id="dumpToggle" style="margin:12px 2px">Ver concluídas</button>
+    <div class="card hidden" id="dumpDone"></div>
+  </section>
+
+  <!-- ============ MAIS ============ -->
+  <section id="v-mais" class="hidden">
+    <p class="hello">Mais</p>
+    <div class="farmlist" style="margin-top:16px" id="maisLista"></div>
+  </section>
+
+  <!-- ============ DIÁRIO ============ -->
+  <section id="v-diario" class="hidden">
+    <p class="hello">Diário</p>
+    <p class="sub" style="text-transform:none">Tudo o que você fez, dia a dia. Bateu a dúvida? Procure aqui.</p>
+    <input id="dSearch" type="search" placeholder="🔍 Procurar (ex.: Geraldo, relatório, Lucas)" style="margin-top:16px">
+    <div class="weeknav" id="dWeek" style="margin-top:12px">
+      <button id="dPrev" aria-label="Semana anterior">‹</button>
+      <div class="w"><div id="dLabel"></div><div class="small muted" id="dSub" style="font-weight:400"></div></div>
+      <button id="dNext" aria-label="Próxima semana">›</button>
+    </div>
+    <button class="btn soft block" id="dNovo" style="margin-top:14px">+ Escrever no diário</button>
+    <div id="dLista"></div>
+  </section>
+
+  <!-- ============ FAZENDAS ============ -->
+  <section id="v-fazendas" class="hidden">
+    <div id="fzLista">
+      <p class="hello">Fazendas</p>
+      <p class="sub" style="text-transform:none">Pendências, histórico e qualidade do leite de cada cliente.</p>
+      <div id="fzCards" style="margin-top:16px"></div>
+      <button class="btn soft block" id="btnNovoLocal" style="margin-top:12px">+ Cadastrar local</button>
+    </div>
+
+    <div id="fzDetalhe" class="hidden">
+      <button class="back" id="fzVoltar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Fazendas</button>
+      <div class="fhead">
+        <h1 id="fzNome"></h1>
+        <div class="muted small" id="fzInfo"></div>
+        <div class="row" style="gap:16px;margin-top:6px">
+          <a class="link" id="fzMaps" target="_blank" rel="noopener">📍 Ver no mapa</a>
+          <button class="link" id="fzEditar">✏️ Editar</button>
+        </div>
+      </div>
+      <div class="seg" id="fzSeg">
+        <button data-t="pend" class="on">Pendências</button>
+        <button data-t="hist">Histórico</button>
+        <button data-t="leite">Leite 🐄</button>
+      </div>
+
+      <div id="t-pend">
+        <div class="addrow"><input id="pendTxt" placeholder="Nova pendência…"><button class="btn" id="pendAdd" aria-label="Adicionar">+</button></div>
+        <div class="card" id="pendList"></div>
+        <button class="link hidden" id="pendToggle" style="margin:12px 2px">Ver resolvidas</button>
+        <div class="card hidden" id="pendDone"></div>
+      </div>
+
+      <div id="t-hist" class="hidden">
+        <div class="row" style="gap:8px;margin:12px 0">
+          <div class="stat grow"><b id="hTot">0</b><span>atendimentos</span></div>
+          <div class="stat grow"><b id="hUlt">—</b><span>último</span></div>
+        </div>
+        <div class="card" id="histList"></div>
+      </div>
+
+      <div id="t-leite" class="hidden">
+        <div class="card pad" style="margin-top:12px">
+          <div class="row between"><div style="font-weight:700">🐄 Produção de leite</div><div class="muted small" id="pUlt"></div></div>
+          <div class="grid2">
+            <div><label>Dia</label><input type="date" id="pData"></div>
+            <div><label>Litros/dia</label><input type="number" inputmode="decimal" id="pLitros" placeholder="Ex.: 1200"></div>
+          </div>
+          <button class="btn soft block" id="pSalvar" style="margin-top:14px">Salvar produção</button>
+          <div id="pLista"></div>
+        </div>
+        <div class="card pad" style="margin-top:12px">
+          <div style="font-weight:700">Lançar resultado do mês</div>
+          <div class="grid2">
+            <div><label>Mês</label><input type="month" id="qMes"></div>
+            <div><label>CCS</label><input type="number" inputmode="decimal" id="qCcs" placeholder="Ex.: 380"></div>
+          </div>
+          <div class="grid2">
+            <div><label>CPP</label><input type="number" inputmode="decimal" id="qCbt" placeholder="Ex.: 45"></div>
+            <div><label>Obs.</label><input id="qObs" placeholder="opcional"></div>
+          </div>
+          <p class="muted tiny" style="margin:8px 2px 0">CCS em mil células/mL · CPP em mil UFC/mL</p>
+          <button class="btn block" id="qSalvar" style="margin-top:16px">Salvar resultado</button>
+        </div>
+        <div id="qCharts"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEMANA ============ -->
+  <section id="v-semana" class="hidden">
+    <p class="hello">Minha semana</p>
+    <div class="weeknav" style="margin-top:14px">
+      <button id="wPrev" aria-label="Semana anterior">‹</button>
+      <div class="w"><div id="wLabel"></div><div class="small muted" id="wSub" style="font-weight:400"></div></div>
+      <button id="wNext" aria-label="Próxima semana">›</button>
+    </div>
+    <div class="stats" style="margin-top:14px">
+      <div class="stat"><b id="sAt">0</b><span>atendimentos</span></div>
+      <div class="stat"><b id="sH">0h</b><span>horas</span></div>
+      <div class="stat"><b id="sL">0</b><span>locais</span></div>
+    </div>
+    <button class="btn block" id="btnRel" style="margin-top:14px">📋 Gerar relatório da semana</button>
+    <h2>Por tipo de serviço</h2><div class="card pad" id="porTipo" style="padding-top:4px;padding-bottom:4px"></div>
+    <h2>O que foi feito</h2><div class="card pad" id="porItem" style="padding-top:4px;padding-bottom:4px"></div>
+    <h2>Por local</h2><div class="card pad" id="porLocal" style="padding-top:4px;padding-bottom:4px"></div>
+    <h2>Dia a dia</h2><div class="card" id="diaADia"></div>
+  </section>
+</div></div>
+
+<nav><div class="in">
+  <button data-v="inicio" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Início<span class="badge hidden" id="bIni"></span></button>
+  <button data-v="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Agenda<span class="badge hidden" id="bAg"></span></button>
+  <button data-v="anotar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Anotar<span class="badge hidden" id="bAnotar"></span></button>
+  <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais<span class="badge hidden" id="bFaz"></span></button>
+</div></nav>
+
+<!-- Registro rápido -->
+<div class="sheet" id="shRapido"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><div><h3 id="rpNome"></h3><div class="muted small" id="rpHora"></div></div><button class="close" data-close>✕</button></div>
+  <div id="rpPend"></div>
+  <label style="margin-top:18px">O que você vai fazer?</label>
+  <div class="types" id="rpTipos"></div>
+  <p class="muted tiny" style="margin:12px 2px 0">Um toque já registra a chegada. Na saída, o app pede pra você contar o que fez.</p>
+</div></div>
+
+<!-- Registro completo -->
+<div class="sheet" id="shReg"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3 id="regTitulo">Atendimento</h3><button class="close" data-close>✕</button></div>
+  <label>Local</label>
+  <select id="fLocal"></select>
+  <div id="novoLocalInline" class="hidden grid2">
+    <div><label>Nome do local</label><input id="fLocalNome" placeholder="Ex.: Fazenda Boa Vista"></div>
+    <div><label>Cidade</label><input id="fLocalCidade" placeholder="Ex.: Pitangui/MG"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Data</label><input type="date" id="fData"></div>
+    <div><label>Km rodados</label><input type="number" inputmode="numeric" id="fKm" placeholder="opcional"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Chegada</label><input type="time" id="fIni"></div>
+    <div><label>Saída</label><input type="time" id="fFim"></div>
+  </div>
+  <div id="fProdBox" class="hidden">
+    <label>🐄 Produção de leite da fazenda (litros/dia)</label>
+    <input type="number" inputmode="decimal" id="fLitros" placeholder="Ex.: 1200 — pergunte ao produtor">
+    <p class="muted tiny" style="margin:6px 2px 0" id="fProdUlt"></p>
+  </div>
+  <div id="fLeiteBox" class="hidden">
+    <label>🥛 CCS e CPP da fazenda <span class="muted tiny">(último resultado do laticínio)</span></label>
+    <div class="grid2">
+      <div><input type="number" inputmode="decimal" id="fCcs" placeholder="CCS (mil cél/mL)"></div>
+      <div><input type="number" inputmode="decimal" id="fCbt" placeholder="CPP (mil UFC/mL)"></div>
+    </div>
+    <p class="muted tiny" style="margin:6px 2px 0" id="fLeiteMes"></p>
+  </div>
+  <label>Tipo de serviço</label>
+  <div class="types" id="fTipos"></div>
+  <label>O que você fez <span class="muted tiny">(marque)</span></label>
+  <div class="itens" id="fItens"></div>
+  <label>O que foi feito</label>
+  <textarea id="fDesc" placeholder="Ex.: troca de teteiras, regulagem do vácuo, CMT em 40 vacas…"></textarea>
+  <div class="row" style="margin-top:18px;gap:8px">
+    <button class="btn danger hidden" id="fDel">Excluir</button>
+    <button class="btn block" id="fSalvar">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Local -->
+<div class="sheet" id="shLoc"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3 id="locTitulo">Novo local</h3><button class="close" data-close>✕</button></div>
+  <label>Nome</label><input id="lNome" placeholder="Ex.: Fazenda Boa Vista">
+  <div class="grid2">
+    <div><label>Cidade</label><input id="lCidade" placeholder="Ex.: Bom Despacho/MG"></div>
+    <div><label>Tipo</label><select id="lCat"><option>Fazenda / cliente</option><option>Escritório</option><option>Cidade / outros</option></select></div>
+  </div>
+  <label>Cor</label><div class="cores" id="lCores"></div>
+  <label>O que você costuma fazer aqui <span class="muted tiny">(já vem marcado na saída)</span></label>
+  <div class="itens" id="lItens"></div>
+  <label>Proprietário / observações</label><input id="lObs" placeholder="Ex.: Proprietário: João · ordenha 2x8">
+  <label>Link do Google Maps <span class="muted tiny">(opcional)</span></label><input id="lMaps" placeholder="https://maps.app.goo.gl/…">
+  <p class="muted tiny" style="margin:6px 2px 0">No Google Maps: abra o lugar → Compartilhar → Copiar link.</p>
+  <div class="row" style="margin-top:18px;gap:8px">
+    <button class="btn danger hidden" id="lDel">Excluir</button>
+    <button class="btn block" id="lSalvar">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Compromisso -->
+<div class="sheet" id="shAg"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3 id="agTitulo">Compromisso</h3><button class="close" data-close>✕</button></div>
+  <label>O quê</label><input id="aTit" placeholder="Ex.: Visita Fazenda do Polidoro com o Lucas">
+  <div class="grid2">
+    <div><label>Dia</label><input type="date" id="aData"></div>
+    <div><label>Hora <span class="muted tiny">(opcional)</span></label><input type="time" id="aHora"></div>
+  </div>
+  <label>Local <span class="muted tiny">(opcional)</span></label><select id="aLocal"></select>
+  <label>Roteiro de várias fazendas <span class="muted tiny">(toque na ordem da rota)</span></label>
+  <div class="pchips" id="aParadas"></div>
+  <label>Observações <span class="muted tiny">(opcional)</span></label><input id="aObs" placeholder="Ex.: levar kit de CMT">
+  <a class="btn soft block" id="aGcal" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin-top:18px">🔔 Criar lembrete no Google Agenda</a>
+  <div class="row" style="margin-top:10px;gap:8px">
+    <button class="btn danger hidden" id="aDel">Excluir</button>
+    <button class="btn block" id="aSalvar">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Chegada -->
+<div class="sheet" id="shCheg"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><div><h3 id="chTit"></h3><div class="muted small" id="chSub"></div></div><button class="close" data-close>✕</button></div>
+  <div id="chPend"></div>
+  <p class="muted small" style="margin:14px 2px 0">Enquanto conversa com o produtor — tudo opcional:</p>
+  <div id="chCampos"></div>
+  <button class="btn block big" id="chSalvar">Salvar</button>
+  <button class="link" id="chDepois" style="width:100%;text-align:center;margin-top:6px">Depois</button>
+  <div class="row between" style="margin-top:6px"><button class="link small" id="chTipo"></button><button class="link small" id="chErro" style="color:var(--muted)">Toquei errado</button></div>
+</div></div>
+
+<!-- Saída -->
+<div class="sheet" id="shSai"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><div><h3 id="saiTit"></h3><div class="muted small" id="saiSub"></div></div><button class="close" data-close>✕</button></div>
+  <label>Conta tudo de uma vez <span class="muted tiny">(🎙️ fale pelo microfone do teclado)</span></label>
+  <textarea id="saiFala" style="min-height:80px" placeholder="Ex.: fiz a rotina de ordenha e acompanhei os técnicos, CCS 380, CPP 40, tão tirando 1200 litros, ficou pendente trocar as teteiras"></textarea>
+  <button class="btn soft block" id="saiOrg" style="margin-top:8px">✨ Organizar pra mim</button>
+  <div id="saiPendBox"></div>
+  <div id="saiLeite"></div>
+  <label>O que você fez <span class="muted tiny">(toque)</span></label>
+  <div class="itens" id="saiItensBox"></div>
+  <label>Observação <span class="muted tiny">(opcional · 🎙️ use o microfone do teclado)</span></label>
+  <textarea id="saiObs" style="min-height:70px" placeholder="Ex.: trocar teteiras na próxima"></textarea>
+  <button class="btn block big" id="saiPronto">Pronto</button>
+  <button class="link" id="saiMais" style="width:100%;text-align:center;margin-top:6px">Mais detalhes (horários, km, tipo)</button>
+</div></div>
+
+<!-- Diário -->
+<div class="sheet" id="shDia"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3 id="diaTitulo">No diário</h3><button class="close" data-close>✕</button></div>
+  <label>Dia</label><input type="date" id="dData">
+  <label>O que você fez</label><textarea id="dTxt" placeholder="Ex.: visita à Fazenda do Elton com o Emerson"></textarea>
+  <div class="row" style="margin-top:18px;gap:8px">
+    <button class="btn danger hidden" id="dDel">Excluir</button>
+    <button class="btn block" id="dSalvar">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Escolher fazenda (anotação → pendência) -->
+<div class="sheet" id="shPick"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3>Virar pendência de qual fazenda?</h3><button class="close" data-close>✕</button></div>
+  <div class="types" id="pickList" style="margin-top:16px;grid-template-columns:1fr"></div>
+</div></div>
+
+<!-- Relatório -->
+<div class="sheet" id="shRel"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3>Relatório da semana</h3><button class="close" data-close>✕</button></div>
+  <p class="small muted">Copie e cole no WhatsApp ou e-mail.</p>
+  <pre class="report" id="relTxt"></pre>
+  <button class="btn block" id="btnCopiar" style="margin-top:12px">Copiar texto</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= base ================= */
+const TIPOS = [
+  {k:"preventiva", n:"Manutenção preventiva", c:"--t1"},
+  {k:"corretiva", n:"Manutenção corretiva", c:"--t2"},
+  {k:"ordenhabilidade", n:"Ordenhabilidade", c:"--t3"},
+  {k:"qualidade", n:"Qualidade do leite", c:"--t4"},
+  {k:"equipe", n:"Coordenação da equipe", c:"--t5"},
+  {k:"escritorio", n:"Escritório / organização", c:"--t6"},
+  {k:"entrega", n:"Entrega de produtos", c:"--t9"},
+  {k:"comercial", n:"Prospecção / comercial", c:"--t7"},
+  {k:"outro", n:"Outro", c:"--t8"},
+];
+const LIM = {ccs:500, cbt:300}; // IN 76 (mil/mL)
+const ITENS_ESC = ["Montar relatório","Montar ISAI","Lançar notas","Reunião com técnico","Reunião com gestores","Atualizando projetos com o Lucas"];
+const ITENS = ["Rotina de ordenha","Treinamento da equipe","Entrega de produtos","Apresentação de relatório","Apresentação de ISAI","Acompanhar técnicos","Acompanhar vendedores","Realização de testes", ...ITENS_ESC];
+const tipoInfo = k => TIPOS.find(t=>t.k===k) || TIPOS[TIPOS.length-1];
+const $ = id => document.getElementById(id);
+const esc_ = s => esc(s);
+const esc = s => String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseYmd = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const nowHM = () => { const d=new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); };
+const minutos = (a,b) => { if(!a||!b) return 0; const [h1,m1]=a.split(":").map(Number),[h2,m2]=b.split(":").map(Number); const x=(h2*60+m2)-(h1*60+m1); return x>0?x:0; };
+const fmtH = m => { const h=Math.floor(m/60), mm=m%60; return mm? `${h}h${pad(mm)}` : `${h}h`; };
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const nowISO = () => new Date().toISOString();
+const fmtData = s => parseYmd(s).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+const MESES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const MESES_L=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const fmtMes = s => { const [y,m]=s.split("-"); return MESES[+m-1]+"/"+y.slice(2); };
+const fmtNum = n => Number(n).toLocaleString("pt-BR",{maximumFractionDigits:1});
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+const mesAnterior = () => { const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return d.getFullYear()+"-"+pad(d.getMonth()+1); };
+
+let D = {locais:[], registros:[], notas:[], pendencias:[], qualidade:[], agenda:[], diario:[], producao:[]};
+let toastT;
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2400); }
+function setStatus(t, warn){ const s=$("status"); s.textContent=t; s.classList.toggle("warn", !!warn); }
+
+/* ================= armazenamento ================= */
+const COLS=["locais","registros","notas","pendencias","qualidade","agenda","diario","producao"];
+const lsGet=(k,d)=>{ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
+const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+const comPrazo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),ms))]);
+/* Tudo é gravado primeiro no aparelho (fila dc_fila) e enviado quando há sinal.
+   Dentro do Claude o destino é o banco do artifact; fora dele, a planilha do Google. */
+const store = {
+  db:null, mode:"loading", subs:{}, base:{}, q:[], enviando:false, cfg:null, semSinal:false,
+  async init(){
+    this.q=lsGet("dc_fila",[]);
+    let db=null;
+    try{ db = window.claude && await window.claude.use("db"); }catch(e){ db=null; }
+    if(db){ this.db=db; this.mode="db"; }
+    else { this.mode="planilha"; this.cfg=lsGet("dc_planilha",null); $("status").onclick=()=>this.conectar(); }
+    this._status();
+    const tenta=()=>this.sincronizar();
+    addEventListener("online",tenta);
+    document.addEventListener("visibilitychange",()=>{ if(!document.hidden) tenta(); });
+    setInterval(tenta,60000);
+    setTimeout(tenta,300);
+  },
+  _b(c){ if(!(c in this.base)) this.base[c]=lsGet("dcc_"+c, this.mode==="planilha"?lsGet("dc_"+c,[]):[]); return this.base[c]; },
+  _view(c){
+    const m=new Map(this._b(c).map(x=>[x.id,x]));
+    this.q.filter(o=>o.c===c).forEach(o=>{ if(o.del) m.delete(o.id); else m.set(o.id,Object.assign({id:o.id},o.o)); });
+    return [...m.values()];
+  },
+  _emit(c){ this.subs[c] && this.subs[c](this._view(c)); },
+  _setBase(c,arr){ this.base[c]=arr; lsSet("dcc_"+c,arr); this._emit(c); },
+  listen(coll, cb){
+    this.subs[coll]=cb; this._emit(coll);
+    if(this.mode!=="db") return;
+    const timer=setTimeout(()=>{ this.semSinal=true; this._status(); },10000);
+    this.db.collection(coll).onSnapshot(snap=>{
+      const docs=snap.docs.map(d=>Object.assign({id:d.id}, d.data()));
+      if(!snap.metadata.fromCache){ clearTimeout(timer); this.semSinal=false; }
+      else if(!docs.length && this._b(coll).length) return;
+      this._setBase(coll,docs); this._status();
+    }, err=>{ clearTimeout(timer); this.semSinal=true; this._status(); });
+  },
+  _status(){
+    const n=this.q.length, g=n===1?"1 item guardado":n+" itens guardados";
+    if(n) return setStatus("📴 "+g+" no aparelho — envio quando tiver sinal", true);
+    if(this.semSinal) return setStatus("📴 Sem sinal — mostrando o que está guardado no aparelho", true);
+    if(this.mode==="db") return setStatus("✓ Salvo na nuvem");
+    if(this.cfg) return setStatus("✓ Sincronizado com a planilha");
+    setStatus("Salvando só neste aparelho · toque aqui para conectar a planilha", true);
+  },
+  conectar(){
+    if(this.cfg) return;
+    const t=(prompt("Cole o código de conexão da planilha:")||"").trim(), i=t.lastIndexOf("|");
+    if(i<1){ if(t) toast("Código inválido"); return; }
+    this.cfg={url:t.slice(0,i),token:t.slice(i+1)}; lsSet("dc_planilha",this.cfg);
+    this._status(); this.sincronizar();
+  },
+  _enq(op){
+    this.q=this.q.filter(x=>!(x.c===op.c&&x.id===op.id)); this.q.push(op); lsSet("dc_fila",this.q);
+    this._emit(op.c); this._status(); this.sincronizar();
+  },
+  async save(coll,id,obj){ this._enq({c:coll,id,o:(({id:_,...r})=>r)(obj)}); },
+  async remove(coll,id){ this._enq({c:coll,id,del:true}); },
+  _aplicado(op){
+    const a=this._b(op.c).filter(x=>x.id!==op.id);
+    if(!op.del) a.push(Object.assign({id:op.id},op.o));
+    this.base[op.c]=a; lsSet("dcc_"+op.c,a);
+    this.q=this.q.filter(x=>x!==op); lsSet("dc_fila",this.q);
+  },
+  async _post(ops){
+    const r=await comPrazo(fetch(this.cfg.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({token:this.cfg.token,ops})}),20000);
+    const j=await r.json(); if(!j.ok) throw new Error(j.error||"erro");
+  },
+  async sincronizar(){
+    if(this.enviando || (this.mode==="planilha"&&!this.cfg)) return;
+    if(navigator.onLine===false){ this.semSinal=true; this._status(); return; }
+    this.enviando=true;
+    try{
+      if(this.mode==="db"){
+        while(this.q.length){
+          const op=this.q[0], ref=this.db.collection(op.c).doc(op.id);
+          try{ await comPrazo(op.del?ref.delete():ref.set(op.o),10000); }
+          catch(e){ if(e&&e.code==="quota_exceeded"){ this.q=this.q.filter(x=>x!==op); lsSet("dc_fila",this.q); this._emit(op.c); toast("Limite de armazenamento atingido"); break; } throw e; }
+          this._aplicado(op);
+        }
+      } else {
+        const ops=this.q.slice();
+        if(ops.length){ await this._post(ops); ops.forEach(o=>this._aplicado(o)); }
+        const r=await comPrazo(fetch(this.cfg.url+"?token="+encodeURIComponent(this.cfg.token)),20000);
+        const j=await r.json(); if(!j.ok) throw new Error(j.error||"erro");
+        COLS.forEach(c=>{ if(j.data[c]) this._setBase(c,j.data[c]); });
+        this.semSinal=false;
+      }
+      COLS.forEach(c=>this._emit(c));
+    }catch(e){ if(this.mode==="planilha") this.semSinal=true; }
+    this.enviando=false; this._status();
+  }
+};
+async function salvar(coll,id,obj,msg){
+  try{ await store.save(coll,id,obj); if(msg) toast(msg); return true; }
+  catch(e){ toast(e&&e.code==="quota_exceeded"? "Limite de armazenamento atingido" : "Não consegui salvar — tente de novo"); return false; }
+}
+async function apagar(coll,id,msg){
+  try{ await store.remove(coll,id); if(msg) toast(msg); return true; } catch(e){ toast("Não consegui apagar"); return false; }
+}
+const strip = o => { const c=Object.assign({},o); delete c.id; return c; };
+
+/* ================= navegação ================= */
+let view="inicio", fazAtual=null, fazTab="pend";
+function irPara(v){
+  view=v;
+  { const nk=["diario","fazendas","semana"].includes(v)?"mais":v; document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on", x.dataset.v===nk)); }
+  ["inicio","agenda","anotar","mais","diario","fazendas","semana"].forEach(k=>$("v-"+k).classList.toggle("hidden", k!==v));
+  if(v==="fazendas" && !fazAtual) mostrarLista();
+  $("scroller").scrollTo(0,0); render();
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="fazendas") fazAtual=null; irPara(b.dataset.v); });
+function abrir(id){ $(id).classList.add("open"); }
+function fechar(id){ $(id).classList.remove("open"); }
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".sheet").classList.remove("open"));
+document.querySelectorAll(".sheet").forEach(s=>s.addEventListener("click",e=>{ if(e.target===s) s.classList.remove("open"); }));
+
+/* ================= helpers de dados ================= */
+const locById = id => D.locais.find(l=>l.id===id);
+const localNome = r => { const l=locById(r.localId); return l? l.nome : (r.localNome||"Sem local"); };
+const localCidade = r => { const l=locById(r.localId); return l? (l.cidade||"") : (r.localCidade||""); };
+const ordenar = a => a.slice().sort((x,y)=> (x.data+(x.inicio||"")).localeCompare(y.data+(y.inicio||"")));
+const pendAbertas = id => D.pendencias.filter(p=>!p.feita && (id? p.localId===id : true));
+const visitas = id => D.registros.filter(r=>r.localId===id);
+const ehFazenda = l => (l.categoria||"Fazenda / cliente")==="Fazenda / cliente";
+const temLeite = (id, mes) => D.qualidade.some(q=>q.localId===id && q.mes===mes);
+const ultProd = id => D.producao.filter(p=>p.localId===id).sort((a,b)=>b.data.localeCompare(a.data))[0];
+const fmtL = n => fmtNum(n)+" L/dia";
+const faltaLeite = () => { const m=mesAnterior(); return D.locais.filter(l=>ehFazenda(l) && !temLeite(l.id,m)); };
+function locaisOrdenados(){
+  const cnt={}; D.registros.forEach(r=>cnt[r.localId]=(cnt[r.localId]||0)+1);
+  return D.locais.slice().sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0) || a.nome.localeCompare(b.nome,"pt-BR"));
+}
+
+/* ================= lembretes dentro do app ================= */
+function lembretes(){
+  const out=[]; const agora=new Date(); const h=agora.getHours(); const hj=ymd(agora);
+  // 1) atendimentos de hoje sem saída ou sem descrição
+  D.registros.filter(r=>r.data===hj && r.inicio && r.tipo!=="entrega").forEach(r=>{
+    if(!r.fim) out.push({ico:"🚗", txt:`Saiu de ${localNome(r)}? Toque para registrar a saída`, act:()=>sair(r)});
+    else if(!r.descricao && !(r.feitos&&r.feitos.length)) out.push({ico:"✍️", txt:`Conte o que fez em ${localNome(r)}`, act:()=>abrirRegistro(r)});
+  });
+  // 2) atendimentos de dias anteriores (últimos 7) sem descrição
+  const lim=new Date(); lim.setDate(lim.getDate()-7); const limK=ymd(lim);
+  const atras=D.registros.filter(r=>r.data<hj && r.data>=limK && !r.descricao && !(r.feitos&&r.feitos.length) && r.tipo!=="entrega");
+  if(atras.length) out.push({ico:"✍️", txt:`${atras.length} visita${atras.length>1?"s":""} dos últimos dias sem descrição`, act:()=>{ diaOff=0; $("dSearch").value=""; irPara("diario"); }});
+  // 3) fim do dia sem nada no diário
+  const dow=agora.getDay();
+  const nadaHoje = !D.diario.some(x=>x.data===hj) && !D.registros.some(r=>r.data===hj);
+  if(h>=15 && dow>=1 && dow<=6 && nadaHoje) out.push({ico:"📖", txt:"Como foi o dia? Conte no diário o que você fez", act:()=>{ irPara("diario"); abrirDia(null); }});
+  // 4) CCS/CBT do mês passado
+  const fl=faltaLeite();
+  if(fl.length && agora.getDate()>=3) out.push({ico:"🥛", txt:`CCS/CPP de ${MESES_L[+mesAnterior().slice(5)-1]}: falta${fl.length>1?"m":""} ${fl.length} fazenda${fl.length>1?"s":""}`, act:()=>{ fazAtual=null; irPara("fazendas"); }});
+  return out;
+}
+
+/* ================= INÍCIO ================= */
+let showAllAlerts=false;
+function renderInicio(){
+  const h=new Date().getHours();
+  $("hello").textContent = (h<12?"Bom dia":h<18?"Boa tarde":"Boa noite")+", Maria Clara";
+  { const t=new Date().toLocaleDateString("pt-BR",{weekday:"long", day:"numeric", month:"long"}); $("hoje").textContent=t.charAt(0).toUpperCase()+t.slice(1); }
+
+  // alertas
+  const L=lembretes();
+  const nNotas=D.notas.filter(n=>!n.feito).length, nPend=pendAbertas().length;
+  let al=L.map((x,i)=>`<button class="alert" data-lb="${i}">${x.ico} ${esc(x.txt)} <span style="margin-left:auto">›</span></button>`).join("");
+  if(nNotas) al+=`<button class="alert" data-go="anotar" style="background:var(--soft);color:var(--brand)">📝 ${nNotas} anotaç${nNotas>1?"ões":"ão"} para resolver <span style="margin-left:auto">›</span></button>`;
+  if(nPend) al+=`<button class="alert" data-go="fazendas" style="background:var(--soft);color:var(--brand)">📌 ${nPend} pendência${nPend>1?"s":""} nas fazendas <span style="margin-left:auto">›</span></button>`;
+  { const tmp=document.createElement("div"); tmp.innerHTML=al; const bs=[...tmp.children];
+    if(bs.length>1 && !showAllAlerts){ bs.slice(1).forEach(x=>x.classList.add("hidden")); tmp.insertAdjacentHTML("beforeend",`<button class="link" id="maisAvisos" style="margin:6px 2px 0">+ ${bs.length-1} aviso${bs.length>2?"s":""}</button>`); }
+    $("alertas").innerHTML=tmp.innerHTML; }
+  if($("maisAvisos")) $("maisAvisos").onclick=()=>{ showAllAlerts=true; renderInicio(); };
+  $("alertas").querySelectorAll("[data-lb]").forEach(b=>b.onclick=()=>L[+b.dataset.lb].act());
+  $("alertas").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ fazAtual=null; irPara(b.dataset.go); });
+
+  // herói: o que fazer agora
+  const hojeK=ymd(new Date());
+  const agToday=ordAg(D.agenda.filter(a=>a.data===hojeK));
+  const heroItem = escolherHeroi(agToday);
+  renderHeroi(heroItem);
+
+  // outros compromissos de hoje
+  const outros=agToday.filter(a=>!heroItem || a.id!==heroItem.id);
+  $("agHojeBox").classList.toggle("hidden", !outros.length);
+  $("agHoje").innerHTML=outros.map(a=>agItemHTML(a,false)).join("");
+  bindAg($("agHoje"));
+
+  // escritório e outros locais (botões grandes)
+  const escs=locaisOrdenados().filter(l=>!ehFazenda(l));
+  $("escBox").classList.toggle("hidden", !escs.length);
+  $("escGrid").innerHTML = escs.map(l=>{
+    const aberto=D.registros.find(r=>r.localId===l.id && r.data===ymd(new Date()) && r.inicio && !r.fim);
+    return `<button class="farm" data-esc="${esc_(l.id)}" style="width:100%;min-height:0;margin-bottom:10px;flex-direction:row;align-items:center;gap:12px;background:var(--soft);border-color:transparent">
+      <span class="pin" style="background:var(--card);font-size:18px">🏢</span>
+      <span class="grow"><b>${esc_(l.nome)}</b><span>${aberto? "Você está aqui desde "+esc_(aberto.inicio)+" · toque pra registrar a saída" : "Um toque registra que você está aqui"}</span></span>
+      <span class="muted" style="font-size:22px">›</span></button>`;
+  }).join("");
+  $("escGrid").querySelectorAll("[data-esc]").forEach(b=>b.onclick=()=>{
+    const aberto=D.registros.find(r=>r.localId===b.dataset.esc && r.data===ymd(new Date()) && r.inicio && !r.fim);
+    if(aberto) sair(aberto); else chegar(b.dataset.esc);
+  });
+
+  // lista de fazendas (com cor)
+  $("gridTitle").textContent = heroItem? "Outra fazenda" : "Em qual fazenda você está?";
+  const g=$("farmGrid");
+  const proxVis={}; D.agenda.filter(a=>a.data>=hojeK && !a.feito).forEach(a=>{ [a.localId,...(a.paradas||[])].filter(Boolean).forEach(id=>{ if(!proxVis[id]||a.data<proxVis[id]) proxVis[id]=a.data; }); });
+  g.innerHTML = locaisOrdenados().filter(ehFazenda).map(l=>{
+    const np=pendAbertas(l.id).length;
+    return `<button class="frow" data-id="${esc(l.id)}"><span class="fdot" style="background:var(--f${corDe(l)})"></span>
+      <span class="grow"><b>${esc(l.nome)}</b><br><span class="s">${esc(dono(l)||l.cidade||"")}</span></span>
+      ${np?`<span class="flag">📌 ${np}</span>`:""}${proxVis[l.id]?`<span class="s">${proxVis[l.id]===hojeK?"hoje":fmtData(proxVis[l.id])}</span>`:""}</button>`;
+  }).join("") + `<button class="frow add" id="farmAdd">+ Cadastrar outro local</button>`;
+  g.querySelectorAll(".frow[data-id]").forEach(b=>b.onclick=()=>chegar(b.dataset.id));
+  $("farmAdd").onclick=()=>abrirRegistro(null,"__novo");
+
+  // hoje
+  const lst=ordenar(D.registros.filter(r=>r.data===ymd(new Date())));
+  const el=$("listaHoje");
+  el.innerHTML = lst.length? lst.map(r=>entryHTML(r,true)).join("") : `<div class="empty">Nada registrado hoje ainda.<br>Toque na fazenda onde você está 👆</div>`;
+  bindEntries(el);
+}
+
+/* ---- cores e herói ---- */
+function corDe(l){ if(!l) return 7; if(l.cor!=null && l.cor!=="") return +l.cor; let h=0; for(const c of String(l.id)) h=(h*31+c.charCodeAt(0))>>>0; return h%10; }
+function dono(l){ if(!l||!l.obs) return ""; const m=l.obs.match(/propriet[aá]ri[oa]\s*:\s*([^·,]+)/i); const n=(m? m[1] : l.obs).trim().split(/\s+/).slice(0,2).join(" "); return n; }
+const ehEntrega = a => /entrega|prospec|roteiro/i.test(a.titulo||"");
+const regsHoje = id => ordenar(D.registros.filter(r=>r.data===ymd(new Date()) && r.localId===id));
+function escolherHeroi(list){
+  const pend=list.filter(a=>!a.feito);
+  return list.find(a=>a.paradas&&a.paradas.length&&!a.feito)
+    || pend.find(a=>a.localId && !ehEntrega(a))
+    || pend.find(ehEntrega)
+    || list.find(a=>a.paradas&&a.paradas.length)
+    || null;
+}
+function renderHeroi(it){
+  const H=$("hero");
+  if(!it){ H.innerHTML=""; return; }
+  const hm = r => r.inicio+(r.fim?"–"+r.fim:"");
+  if(it.paradas && it.paradas.length){
+    const stops=it.paradas.map(id=>locById(id)).filter(Boolean);
+    const st=stops.map(l=>{ const rs=regsHoje(l.id); const open=rs.find(r=>!r.fim); return {l, rs, open, done: rs.length>0 && !open}; });
+    const anyOpen=st.some(s=>s.open); const nextI=anyOpen? -1 : st.findIndex(s=>!s.done);
+    const nDone=st.filter(s=>s.done).length;
+    H.innerHTML=`<div class="hero">
+      <div class="k">🚚 Roteiro de hoje</div>
+      <div class="ti1">${esc(it.titulo)}</div>
+      <div class="ti2">${nDone} de ${st.length} paradas feitas${nDone===st.length?" · tudo certo! 🎉":""}</div>
+      <div style="margin-top:10px">${st.map((s,i)=>`<div class="stop ${s.done?"done":""} ${i===nextI?"next":""}">
+        <span class="n" style="background:var(--f${corDe(s.l)})">${s.done?"✓":i+1}</span>
+        <span class="grow"><span class="nm" style="font-weight:700">${esc(s.l.nome)}</span><br><span class="tiny muted">${esc(dono(s.l)||s.l.cidade||"")}${s.rs.length?" · "+s.rs.map(hm).join(", "):""}</span></span>
+        ${s.open? `<button class="act out" data-sai="${esc(s.open.id)}">Saí</button>` : s.done? "" : `<button class="act" data-chg="${esc(s.l.id)}">Cheguei</button>`}
+      </div>`).join("")}</div>
+      <button class="link" id="heroEdit" style="margin-top:6px">✏️ Editar roteiro</button></div>`;
+    H.querySelectorAll("[data-chg]").forEach(b=>b.onclick=async()=>{
+      b.disabled=true; const l=locById(b.dataset.chg);
+      await salvar("registros", uid(), {data:ymd(new Date()), inicio:nowHM(), fim:"", localId:l.id, localNome:l.nome, localCidade:l.cidade||"", tipo:"entrega", feitos:["Entrega de produtos"], descricao:"", km:null, criadoEm:nowISO(), atualizadoEm:nowISO()}, "✓ Chegada em "+l.nome);
+    });
+    H.querySelectorAll("[data-sai]").forEach(b=>b.onclick=async()=>{
+      b.disabled=true; const r=D.registros.find(x=>x.id===b.dataset.sai); if(!r) return;
+      if(await salvar("registros", r.id, Object.assign(strip(r),{fim:nowHM(),atualizadoEm:nowISO()}), "Saída de "+localNome(r)+" às "+nowHM())){
+        const falta=st.filter(s=>!s.done && s.l.id!==r.localId).length;
+        if(!falta) await salvar("agenda", it.id, Object.assign(strip(it),{feito:true}), "🎉 Roteiro concluído!");
+      }
+    });
+    $("heroEdit").onclick=()=>abrirAg(it);
+    return;
+  }
+  if(it.localId && !ehEntrega(it)){
+    const l=locById(it.localId); const rs=l? regsHoje(l.id) : []; const open=rs.find(r=>!r.fim);
+    const cor=`var(--f${corDe(l)})`;
+    let acao;
+    if(open) acao=`<div class="ti2" style="margin-top:10px">Você chegou às <b>${esc(open.inicio)}</b> · <button class="link" id="heroDados" style="padding:0">🥛 dados do leite</button></div><button class="btn big" id="heroSai" style="background:var(--warm);color:var(--warm-ink)">🚗 Saí</button>`;
+    else if(rs.length) acao=`<div class="ti2" style="margin-top:10px">✓ Visita registrada (${rs.map(hm).join(", ")})</div><button class="btn soft big" id="heroOk">Concluir o dia ✓</button>`;
+    else acao=`<button class="btn big" id="heroChg">📍 Cheguei</button>`;
+    H.innerHTML=`<div class="hero" style="border-color:${cor}">
+      <div class="k" style="display:flex;align-items:center;gap:8px"><span class="fdot" style="background:${cor}"></span>Seu dia</div>
+      <div class="ti1">${esc(it.titulo)}</div>
+      <div class="ti2">${l? esc(l.cidade||""):""}${it.hora?" · "+esc(it.hora):""}${it.obs? "<br>"+esc(it.obs):""}</div>
+      ${l&&pendAbertas(l.id).length? `<div class="tip" style="margin-top:12px;padding:10px 12px"><b>📌 Pendências aqui:</b><br>${pendAbertas(l.id).map(p=>"• "+esc(p.texto)).join("<br>")}</div>`:""}
+      ${acao}</div>`;
+    if($("heroChg")) $("heroChg").onclick=()=>chegar(l.id);
+    if($("heroSai")) $("heroSai").onclick=()=>sair(open, it);
+    if($("heroDados")) $("heroDados").onclick=()=>abrirChegada(open.id);
+    if($("heroOk")) $("heroOk").onclick=()=>salvar("agenda", it.id, Object.assign(strip(it),{feito:true}), "✓ Dia concluído!");
+    return;
+  }
+  H.innerHTML=`<div class="hero">
+    <div class="k">🚚 Hoje</div>
+    <div class="ti1">${esc(it.titulo)}</div>
+    <div class="ti2">Escolha as fazendas na ordem da rota e o app vai te guiando.</div>
+    <button class="btn big" id="heroRot">Montar roteiro</button>
+    <div class="tiny muted" style="margin-top:10px;text-align:center">Ou toque direto na fazenda quando chegar, lá embaixo 👇</div></div>`;
+  $("heroRot").onclick=()=>abrirAg(it);
+}
+
+function entryHTML(r, comSaida){
+  const t=tipoInfo(r.tipo); const min=minutos(r.inicio,r.fim);
+  const hora = r.inicio ? (r.inicio + (r.fim? " – "+r.fim : "")) : "";
+  const cid = localCidade(r);
+  const podeSair = comSaida && r.inicio && !r.fim && r.data===ymd(new Date());
+  return `<div class="entry" data-id="${esc(r.id)}">
+    <div class="bar" style="background:${locById(r.localId)? `var(--f${corDe(locById(r.localId))})` : `var(${t.c})`}"></div>
+    <div class="grow">
+      <div class="row between"><span class="place">${esc(localNome(r))}</span><span class="t">${esc(hora)}${min? " · "+fmtH(min):""}</span></div>
+      ${cid||r.km? `<div class="small muted">${esc(cid)}${cid&&r.km?" · ":""}${r.km? esc(r.km)+" km":""}</div>`:""}
+      <span class="tag" style="background:color-mix(in srgb, var(${t.c}) 14%, transparent);color:var(--ink)"><span class="fdot" style="width:9px;height:9px;background:var(${t.c});margin-right:6px"></span>${esc(t.n)}</span>
+      ${r.feitos&&r.feitos.length? `<div class="feitos">${r.feitos.map(f=>`<span>✓ ${esc(f)}</span>`).join("")}</div>`:""}
+      ${r.descricao? `<div class="desc">${esc(r.descricao)}</div>`:""}
+      ${podeSair? `<button class="saida" data-sair="${esc(r.id)}">🚗 Saí</button>`:""}
+    </div></div>`;
+}
+function bindEntries(root){
+  root.querySelectorAll(".entry[data-id]").forEach(el=>el.onclick=e=>{
+    if(e.target.closest("[data-sair]")) return;
+    abrirRegistro(D.registros.find(r=>r.id===el.dataset.id));
+  });
+  root.querySelectorAll("[data-sair]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const r=D.registros.find(x=>x.id===b.dataset.sair); if(!r) return;
+    sair(r);
+  });
+}
+
+/* ---- chegada e saída com 1 toque ---- */
+function inferTipo(localId){
+  const l=locById(localId); if(l && !ehFazenda(l)) return "escritorio";
+  const hj=ymd(new Date());
+  const ag=D.agenda.find(a=>a.data===hj && !a.feito && (a.localId===localId || (a.paradas||[]).includes(localId)));
+  if(ag){ if(ehEntrega(ag)) return "entrega"; if(/mensal|bimestral|visita/i.test(ag.titulo||"")) return "ordenhabilidade"; }
+  const last=D.registros.filter(r=>r.localId===localId).sort((a,b)=>(b.data+(b.inicio||"")).localeCompare(a.data+(a.inicio||"")))[0];
+  return last? last.tipo : "ordenhabilidade";
+}
+let chegando=false;
+async function chegar(localId){
+  if(chegando) return; const l=locById(localId); if(!l) return;
+  const aberto=D.registros.find(r=>r.localId===localId && r.data===ymd(new Date()) && r.inicio && !r.fim);
+  if(aberto){ if(ehFazenda(l)) abrirChegada(aberto.id); else toast("Você está aqui desde "+aberto.inicio); return; }
+  chegando=true;
+  const id=uid(), tipo=inferTipo(localId);
+  const ok=await salvar("registros", id, {data:ymd(new Date()), inicio:nowHM(), fim:"", localId, localNome:l.nome, localCidade:l.cidade||"", tipo, feitos: tipo==="entrega"?["Entrega de produtos"]:[], descricao:"", km:null, criadoEm:nowISO(), atualizadoEm:nowISO()}, "✓ Chegada às "+nowHM()+" — "+l.nome);
+  chegando=false;
+  if(ok && ehFazenda(l) && tipo!=="entrega") abrirChegada(id, {id, localId, tipo, inicio:nowHM(), data:ymd(new Date())});
+}
+const leiteJa = (localId, data) => ({ prod: D.producao.find(p=>p.localId===localId && p.data===data), q: D.qualidade.find(q=>q.localId===localId && q.mes===mesAnterior()) });
+function leiteFields(pf, localId, data){
+  const {prod,q}=leiteJa(localId,data); const up=ultProd(localId); const mes=MESES_L[+mesAnterior().slice(5)-1];
+  return `<label>🐄 Volume de leite (litros/dia)</label>
+    <input type="number" inputmode="decimal" id="${pf}Lit" value="${prod?esc(prod.litros):""}" placeholder="${up? "Último: "+fmtNum(up.litros)+" — mudou?" : "Ex.: 1200"}">
+    <label>🥛 CCS e CPP de ${mes} <span class="muted tiny">(mil/mL)</span></label>
+    <div class="grid2"><input type="number" inputmode="decimal" id="${pf}Ccs" value="${q&&q.ccs!=null?esc(q.ccs):""}" placeholder="CCS"><input type="number" inputmode="decimal" id="${pf}Cpp" value="${q&&q.cbt!=null?esc(q.cbt):""}" placeholder="CPP"></div>`;
+}
+async function salvarLeite(pf, localId, data){
+  const lt=$(pf+"Lit").value, ccs=$(pf+"Ccs").value, cpp=$(pf+"Cpp").value;
+  if(lt!=="") await salvar("producao", localId+"_"+data, {localId, data, litros:Number(lt), atualizadoEm:nowISO()});
+  if(ccs!==""||cpp!==""){ const m=mesAnterior(); const old=D.qualidade.find(q=>q.localId===localId&&q.mes===m);
+    await salvar("qualidade", localId+"_"+m, {localId, mes:m, ccs: ccs===""?(old?old.ccs:null):Number(ccs), cbt: cpp===""?(old?old.cbt:null):Number(cpp), obs: old?(old.obs||""):"", atualizadoEm:nowISO()}); }
+  return lt!==""||ccs!==""||cpp!=="";
+}
+let chReg=null;
+function abrirChegada(regId, fallback){
+  const r=D.registros.find(x=>x.id===regId)||fallback; if(!r) return; chReg=r;
+  const l=locById(r.localId);
+  $("chTit").textContent="✓ Chegou às "+r.inicio;
+  $("chSub").textContent=l? l.nome : "";
+  const ps=pendAbertas(r.localId);
+  $("chPend").innerHTML = ps.length? `<div class="tip" style="margin-top:12px;padding:10px 12px"><b>📌 Pendências aqui:</b><br>${ps.map(p=>"• "+esc(p.texto)).join("<br>")}</div>`:"";
+  $("chCampos").innerHTML=leiteFields("ch", r.localId, r.data);
+  $("chTipo").textContent="Tipo: "+tipoInfo(r.tipo).n+" · mudar";
+  abrir("shCheg");
+}
+$("chSalvar").onclick=async()=>{ const r=chReg; if(!r) return; $("chSalvar").disabled=true; if(await salvarLeite("ch", r.localId, r.data)) toast("🥛 Dados do leite salvos"); $("chSalvar").disabled=false; fechar("shCheg"); };
+$("chDepois").onclick=()=>fechar("shCheg");
+$("chTipo").onclick=()=>{ fechar("shCheg"); const r=D.registros.find(x=>x.id===chReg.id); if(r) abrirRegistro(r); };
+$("chErro").onclick=async()=>{ if(!chReg) return; if(await apagar("registros", chReg.id, "Chegada desfeita")) fechar("shCheg"); };
+
+let saiReg=null, saiItens=new Set();
+async function sair(r, agItem){
+  const novo=Object.assign(strip(r),{fim:nowHM(), atualizadoEm:nowISO()});
+  if(!await salvar("registros", r.id, novo, "🚗 Saída às "+novo.fim)) return;
+  const ag = agItem || D.agenda.find(a=>a.data===r.data && !a.feito && a.localId===r.localId && !ehEntrega(a));
+  if(ag) await salvar("agenda", ag.id, Object.assign(strip(ag),{feito:true}));
+  const l=locById(r.localId);
+  if(!l || r.tipo==="entrega") return;
+  saiReg=Object.assign({id:r.id},novo); saiItens=new Set(novo.feitos||[]);
+  if(!saiItens.size && l.padrao && l.padrao.length) l.padrao.forEach(x=>{ if(ITENS.includes(x)) saiItens.add(x); });
+  if(!saiItens.size && novo.tipo==="ordenhabilidade") saiItens.add("Rotina de ordenha");
+  $("saiTit").textContent="✓ Saída às "+novo.fim;
+  $("saiSub").textContent=l.nome+" · "+novo.inicio+"–"+novo.fim;
+  const {prod,q}=leiteJa(r.localId, r.data);
+  $("saiLeite").innerHTML = (!ehFazenda(l) || (prod && q))? "" : leiteFields("sa", r.localId, r.data);
+  $("saiObs").value=novo.descricao||""; $("saiFala").value=""; saiPends=[]; $("saiPendBox").innerHTML="";
+  saiOutros=false; montarSaiItens(); abrir("shSai");
+}
+let saiOutros=false;
+function montarSaiItens(){
+  const l=saiReg? locById(saiReg.localId):null; const pad=(l&&l.padrao||[]).filter(x=>ITENS.includes(x));
+  const doTipo = (l && !ehFazenda(l))? ITENS_ESC : ITENS.filter(i=>!ITENS_ESC.includes(i));
+  const base = pad.length? ITENS.filter(i=>pad.includes(i)||saiItens.has(i)) : ITENS.filter(i=>doTipo.includes(i)||saiItens.has(i));
+  const resto = ITENS.filter(i=>!base.includes(i));
+  const btn=(it)=>`<button type="button" class="item ${saiItens.has(it)?"on":""}" data-i="${ITENS.indexOf(it)}"><span class="cb ${saiItens.has(it)?"on":""}">${CHECK}</span>${esc(it)}</button>`;
+  $("saiItensBox").innerHTML = base.map(btn).join("") + (resto.length? (saiOutros? resto.map(btn).join("") : `<button type="button" class="link" id="saiOutrosBtn">+ outras (${resto.length})</button>`) : "");
+  $("saiItensBox").querySelectorAll(".item").forEach(b=>b.onclick=()=>{ const it=ITENS[+b.dataset.i]; saiItens.has(it)? saiItens.delete(it) : saiItens.add(it); montarSaiItens(); });
+  if($("saiOutrosBtn")) $("saiOutrosBtn").onclick=()=>{ saiOutros=true; montarSaiItens(); };
+}
+$("saiPronto").onclick=async()=>{
+  const r=saiReg; if(!r) return; $("saiPronto").disabled=true;
+  if($("saLit")) await salvarLeite("sa", r.localId, r.data);
+  await salvar("registros", r.id, Object.assign(strip(r),{feitos:ITENS.filter(i=>saiItens.has(i)), descricao:$("saiObs").value.trim(), atualizadoEm:nowISO()}), "✓ Pronto!");
+  for(const t of saiPends) await salvar("pendencias", uid(), {localId:r.localId, texto:t, feita:false, criadoEm:nowISO()});
+  if(saiPends.length) toast("✓ Pronto! "+saiPends.length+" pendência"+(saiPends.length>1?"s":"")+" criada"+(saiPends.length>1?"s":""));
+  $("saiPronto").disabled=false; fechar("shSai");
+};
+$("saiMais").onclick=()=>{ const r=saiReg; fechar("shSai"); const x=D.registros.find(y=>y.id===r.id)||r; abrirRegistro(Object.assign({},x,{feitos:ITENS.filter(i=>saiItens.has(i))})); };
+
+/* ---- "conta tudo": o app organiza sozinho ---- */
+let saiPends=[];
+function organizarLocal(t){
+  const s=norm(t); const num=x=>x? Number(String(x).replace(/\./g,"").replace(",",".")) : null;
+  const m1=s.match(/ccs\D{0,12}(\d[\d.,]*)/), m2=s.match(/(?:cpp|cbt)\D{0,12}(\d[\d.,]*)/), m3=s.match(/(\d[\d.,]*)\s*(?:mil\s*)?(?:l\b|lt|litro)/);
+  const mapa=[["montar relat","Montar relatório"],["montei o relat","Montar relatório"],["montar isai","Montar ISAI"],["montei o isai","Montar ISAI"],["lancar nota","Lançar notas"],["lancei","Lançar notas"],["reuniao com tecnic","Reunião com técnico"],["reuniao com o tecnic","Reunião com técnico"],["reuniao com gestor","Reunião com gestores"],["reuniao com os gestor","Reunião com gestores"],["lucas","Atualizando projetos com o Lucas"],["ordenha","Rotina de ordenha"],["treina","Treinamento da equipe"],["entreg","Entrega de produtos"],["relatorio","Apresentação de relatório"],["isai","Apresentação de ISAI"],["tecnic","Acompanhar técnicos"],["vendedor","Acompanhar vendedores"],["teste","Realização de testes"]];
+  const feitos=mapa.filter(([k])=>s.includes(k)).map(x=>x[1]);
+  const pend=[]; const pm=t.match(/(?:ficou pendente|pendente|falta|faltou|precisa|precisamos|preciso|na pr[oó]xima)\s*[:,-]?\s*([^.;\n]+)/i); if(pm) pend.push(pm[1].trim());
+  let lit=m3? num(m3[1]) : null; if(lit!=null && /mil\s*(?:l\b|lt|litro)/.test(s) && lit<100) lit*=1000;
+  return {feitos, litros:lit, ccs:m1?num(m1[1]):null, cpp:m2?num(m2[1]):null, obs:t.trim(), pendencias:pend};
+}
+async function organizar(t){
+  try{
+    if(!samplerP) samplerP = window.claude ? window.claude.use("sample") : Promise.resolve(null);
+    const sample=await samplerP;
+    if(sample){
+      const r=await sample.json(`Uma médica veterinária acabou de sair de uma visita a uma fazenda leiteira e ditou o resumo abaixo. Extraia os dados.
+Itens possíveis do que ela fez (use exatamente estes nomes): ${JSON.stringify(ITENS)}
+Responda SOMENTE com JSON: {"feitos":[itens da lista acima que ela fez],"litros":número de litros/dia de produção ou null,"ccs":número em mil cél/mL ou null,"cpp":número em mil UFC/mL (CPP ou CBT) ou null,"obs":"resumo curto e claro do que foi feito/conversado, em português, sem repetir os números","pendencias":["coisas que ficaram para fazer depois, frases curtas"]}
+Se ela disser "380 mil" de CCS, ccs=380. Se disser "1.200 litros" ou "mil e duzentos litros", litros=1200.
+Resumo: """${t.slice(0,3000)}"""`, {modelTier:"quick", cache:false});
+      if(r && typeof r==="object"){
+        r.feitos=(Array.isArray(r.feitos)?r.feitos:[]).filter(x=>ITENS.includes(x));
+        r.pendencias=(Array.isArray(r.pendencias)?r.pendencias:[]).map(String).filter(Boolean).slice(0,6);
+        ["litros","ccs","cpp"].forEach(k=>{ r[k]= (r[k]===null||r[k]===undefined||r[k]==="")? null : Number(r[k]); if(isNaN(r[k])) r[k]=null; });
+        return r;
+      }
+    }
+  }catch(e){}
+  return organizarLocal(t);
+}
+$("saiOrg").onclick=async()=>{
+  const t=$("saiFala").value.trim(); if(!t){ $("saiFala").focus(); toast("Fale ou escreva o que aconteceu"); return; }
+  const b=$("saiOrg"); b.disabled=true; b.textContent="Organizando…";
+  const r=await organizar(t); const reg=saiReg;
+  (r.feitos||[]).forEach(f=>saiItens.add(f)); montarSaiItens();
+  if(!$("saLit") && (r.litros!=null||r.ccs!=null||r.cpp!=null)) $("saiLeite").innerHTML=leiteFields("sa", reg.localId, reg.data);
+  if($("saLit")){ if(r.litros!=null) $("saLit").value=r.litros; if(r.ccs!=null) $("saCcs").value=r.ccs; if(r.cpp!=null) $("saCpp").value=r.cpp; }
+  if(r.obs) $("saiObs").value = $("saiObs").value? $("saiObs").value+"\n"+r.obs : r.obs;
+  saiPends=r.pendencias||[];
+  $("saiPendBox").innerHTML = saiPends.length? `<div class="tip" style="margin-top:12px;padding:10px 12px"><b>📌 Vou criar ${saiPends.length>1?"estas pendências":"esta pendência"}:</b><br>${saiPends.map((x,i)=>`• ${esc(x)} <button class="x" data-rp="${i}" style="font-size:15px">×</button>`).join("<br>")}</div>`:"";
+  $("saiPendBox").querySelectorAll("[data-rp]").forEach(x=>x.onclick=()=>{ saiPends.splice(+x.dataset.rp,1); x.closest("div").remove(); });
+  b.disabled=false; b.textContent="✨ Organizar pra mim"; toast("✓ Organizado — confira e toque em Pronto");
+};
+
+/* ---- MAIS ---- */
+function renderMais(){
+  const np=pendAbertas().length;
+  const it=[["diario","📖","Diário","Tudo o que você fez, com busca"],["fazendas","🏡","Fazendas",np? `${np} pendência${np>1?"s":""} · histórico e leite` : "Pendências, histórico e leite"],["semana","📊","Semana","Resumo e relatório"]];
+  $("maisLista").innerHTML=it.map(([v,ic,t,s])=>`<button class="frow" data-v="${v}" style="min-height:76px"><span style="font-size:26px">${ic}</span><span class="grow"><b>${t}</b><br><span class="s">${s}</span></span><span class="muted" style="font-size:22px">›</span></button>`).join("");
+  $("maisLista").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="fazendas") fazAtual=null; irPara(b.dataset.v); });
+}
+
+/* ---- registro rápido (2 toques) ---- */
+let rpLocal=null;
+function abrirRapido(localId){
+  rpLocal=localId; const l=locById(localId);
+  $("rpNome").textContent=l.nome;
+  $("rpHora").textContent="Chegada agora: "+nowHM()+(l.cidade? " · "+l.cidade:"");
+  const ps=pendAbertas(localId);
+  let tip = ps.length? `<b>📌 Pendências aqui:</b><br>${ps.map(p=>"• "+esc(p.texto)).join("<br>")}` : "";
+  if(ehFazenda(l)){ const up=ultProd(l.id); tip += (tip?"<br><br>":"")+`<b>🐄 Produção:</b> ${up? fmtL(up.litros)+" (anotada em "+fmtData(up.data)+") — pergunte se mudou" : "pergunte quantos litros/dia a fazenda está produzindo"}.`; }
+  if(ehFazenda(l) && !temLeite(l.id, mesAnterior())) tip += (tip?"<br><br>":"")+`<b>🥛 Aproveite:</b> peça o CCS/CPP de ${MESES_L[+mesAnterior().slice(5)-1]} desta fazenda.`;
+  $("rpPend").innerHTML = tip? `<div class="tip" style="margin-top:14px">${tip}</div>`:"";
+  const ordemT = ehFazenda(l)? TIPOS : ["escritorio","equipe","comercial","qualidade","preventiva","corretiva","ordenhabilidade","outro"].map(tipoInfo);
+  $("rpTipos").innerHTML=ordemT.map(t=>`<button class="type" data-k="${t.k}"><span class="dot" style="background:var(${t.c})"></span>${t.n}</button>`).join("");
+  $("rpTipos").querySelectorAll(".type").forEach(b=>b.onclick=async()=>{
+    $("rpTipos").querySelectorAll(".type").forEach(x=>x.disabled=true);
+    const l=locById(rpLocal);
+    const ok=await salvar("registros", uid(), {data:ymd(new Date()), inicio:nowHM(), fim:"", localId:rpLocal, localNome:l.nome, localCidade:l.cidade||"", tipo:b.dataset.k, feitos:[], descricao:"", km:null, criadoEm:nowISO(), atualizadoEm:nowISO()}, "✓ Chegada registrada em "+l.nome);
+    if(ok) fechar("shRapido");
+    $("rpTipos").querySelectorAll(".type").forEach(x=>x.disabled=false);
+  });
+  abrir("shRapido");
+}
+
+/* ---- registro completo ---- */
+let editReg=null, tipoSel="preventiva", delArm=false;
+function montarTipos(){
+  $("fTipos").innerHTML=TIPOS.map(t=>`<button type="button" class="type ${t.k===tipoSel?"on":""}" data-k="${t.k}"><span class="dot" style="background:var(${t.c})"></span>${t.n}</button>`).join("");
+  $("fTipos").querySelectorAll(".type").forEach(c=>c.onclick=()=>{ tipoSel=c.dataset.k; montarTipos(); });
+}
+let itensSel=new Set();
+function montarItens(){
+  $("fItens").innerHTML=ITENS.map((it,i)=>`<button type="button" class="item ${itensSel.has(it)?"on":""}" data-i="${i}"><span class="cb ${itensSel.has(it)?"on":""}">${CHECK}</span>${esc(it)}</button>`).join("");
+  $("fItens").querySelectorAll(".item").forEach(b=>b.onclick=()=>{ const it=ITENS[+b.dataset.i]; itensSel.has(it)? itensSel.delete(it) : itensSel.add(it); montarItens(); });
+}
+function montarSelect(sel){
+  $("fLocal").innerHTML = `<option value="">Selecione…</option>${locaisOrdenados().map(l=>`<option value="${esc(l.id)}">${esc(l.nome)}${l.cidade?" — "+esc(l.cidade):""}</option>`).join("")}<option value="__novo">+ Cadastrar novo local</option>`;
+  $("fLocal").value = sel||"";
+  $("novoLocalInline").classList.toggle("hidden", $("fLocal").value!=="__novo");
+}
+function atualizaLeiteBox(){
+  const id=$("fLocal").value; const l=locById(id); const m=mesAnterior();
+  const fz=!!(l && ehFazenda(l));
+  $("fProdBox").classList.toggle("hidden", !fz);
+  $("fLeiteBox").classList.toggle("hidden", !fz);
+  const up=fz? ultProd(l.id) : null;
+  $("fProdUlt").textContent = up? "Última anotada: "+fmtL(up.litros)+" em "+fmtData(up.data)+" — pergunte se mudou" : "Ainda não anotada nesta fazenda";
+  const q=fz? D.qualidade.find(x=>x.localId===l.id && x.mes===m) : null;
+  if(q && $("fCcs").value==="" && $("fCbt").value===""){ $("fCcs").value=q.ccs??""; $("fCbt").value=q.cbt??""; }
+  $("fLeiteMes").textContent = "Resultado de "+MESES_L[+m.slice(5)-1]+" · em mil/mL"+(q? " · já lançado, confira" : " · pode deixar em branco se ainda não saiu");
+}
+$("fLocal").onchange=()=>{ $("novoLocalInline").classList.toggle("hidden", $("fLocal").value!=="__novo"); atualizaLeiteBox(); };
+function abrirRegistro(r, localPre, saida){
+  editReg=r||null; delArm=false;
+  $("regTitulo").textContent = saida? "Saída — o que fez, CCS, CPP e volume" : r? "Editar atendimento" : "Novo atendimento";
+  montarSelect(r? r.localId : (localPre||""));
+  $("fLocalNome").value=""; $("fLocalCidade").value="";
+  $("fData").value = r? r.data : ymd(new Date());
+  $("fIni").value = r? (r.inicio||"") : nowHM();
+  $("fFim").value = r? (r.fim || (saida? nowHM() : "")) : "";
+  $("fKm").value = r&&r.km? r.km : "";
+  $("fDesc").value = r? (r.descricao||"") : "";
+  $("fCcs").value=""; $("fCbt").value="";
+  const pj = r? D.producao.find(p=>p.localId===r.localId && p.data===r.data) : null;
+  $("fLitros").value = pj? pj.litros : "";
+  tipoSel = r? (r.tipo||"outro") : "preventiva"; montarTipos();
+  itensSel = new Set(r&&r.feitos&&r.feitos.length? r.feitos : ((r&&locById(r.localId)&&locById(r.localId).padrao)||[])); montarItens();
+  atualizaLeiteBox();
+  $("fDel").classList.toggle("hidden", !r); $("fDel").textContent="Excluir";
+  abrir("shReg");
+  if(saida) toast("Marque o que você fez e salve");
+}
+$("fSalvar").onclick=async()=>{
+  const btn=$("fSalvar"); if(btn.disabled) return;
+  let localId=$("fLocal").value;
+  if(!localId){ toast("Escolha o local"); return; }
+  if(!$("fData").value){ toast("Informe a data"); return; }
+  btn.disabled=true;
+  if(localId==="__novo"){
+    const nome=$("fLocalNome").value.trim(); if(!nome){ toast("Dê um nome ao novo local"); btn.disabled=false; return; }
+    localId=uid();
+    if(!await salvar("locais", localId, {nome, cidade:$("fLocalCidade").value.trim(), categoria:"Fazenda / cliente", mapsLink:"", obs:"", criadoEm:nowISO()})){ btn.disabled=false; return; }
+  }
+  const l=locById(localId);
+  const obj={ data:$("fData").value, inicio:$("fIni").value, fim:$("fFim").value, localId,
+    localNome: l? l.nome : $("fLocalNome").value.trim(), localCidade: l? (l.cidade||"") : $("fLocalCidade").value.trim(),
+    tipo:tipoSel, feitos:ITENS.filter(i=>itensSel.has(i)), descricao:$("fDesc").value.trim(), km:$("fKm").value? Number($("fKm").value):null,
+    criadoEm: editReg? (editReg.criadoEm||nowISO()) : nowISO(), atualizadoEm:nowISO() };
+  const ok=await salvar("registros", editReg? editReg.id : uid(), obj, "✓ Salvo");
+  if(ok){
+    const lt=$("fLitros").value;
+    if(!$("fProdBox").classList.contains("hidden") && lt!==""){
+      await salvar("producao", localId+"_"+obj.data, {localId, data:obj.data, litros:Number(lt), atualizadoEm:nowISO()});
+    }
+    const ccs=$("fCcs").value, cbt=$("fCbt").value;
+    if(!$("fLeiteBox").classList.contains("hidden") && (ccs!==""||cbt!=="")){
+      const m=mesAnterior();
+      await salvar("qualidade", localId+"_"+m, {localId, mes:m, ccs: ccs===""?null:Number(ccs), cbt: cbt===""?null:Number(cbt), obs:"", atualizadoEm:nowISO()}, "✓ Salvo, com CCS/CPP de "+fmtMes(m));
+    }
+    fechar("shReg");
+  }
+  btn.disabled=false;
+};
+$("fDel").onclick=async()=>{
+  if(!editReg) return;
+  if(!delArm){ delArm=true; $("fDel").textContent="Toque de novo"; return; }
+  if(await apagar("registros", editReg.id, "Registro excluído")) fechar("shReg");
+};
+
+/* ================= ANOTAR ================= */
+let showDumpDone=false, pickNota=null;
+$("dumpSave").onclick=async()=>{
+  const t=$("dumpTxt").value.trim(); if(!t){ $("dumpTxt").focus(); return; }
+  const btn=$("dumpSave"); btn.disabled=true; btn.textContent="Organizando…";
+  $("dumpResult").innerHTML="";
+  const r = await entender(t);
+  if(r && r.tipo==="feito"){
+    const ids=[];
+    for(const it of r.itens){ const id=uid(); if(await salvar("diario", id, {data:it.data, texto:it.texto, textoOriginal:t, criadoEm:nowISO()})) ids.push(id); else break; }
+    if(ids.length){ $("dumpTxt").value=""; mostrarDiario(r.itens.slice(0,ids.length), ids, t); }
+  } else if(r && r.tipo==="agenda"){
+    let id=uid();
+    const paradas=(r.paradas||[]).filter(x=>locById(x));
+    let obj={data:r.data, hora:r.hora||"", titulo:r.titulo||t, localId: paradas.length>=2? "" : (r.localId||""), paradas: paradas.length>=2? paradas : [], obs:"", textoOriginal:t, feito:false, criadoEm:nowISO()};
+    if(paradas.length>=2){
+      const ex=D.agenda.find(a=>a.data===r.data && ehEntrega(a) && !a.feito);
+      if(ex){ id=ex.id; const junt=(ex.paradas||[]).slice(); paradas.forEach(p=>{ if(!junt.includes(p)) junt.push(p); }); obj=Object.assign(strip(ex),{paradas:junt, textoOriginal:t}); }
+    }
+    if(await salvar("agenda", id, obj)){
+      $("dumpTxt").value="";
+      mostrarResultado(Object.assign({id},obj), t);
+    }
+  } else {
+    if(await salvar("notas", uid(), {texto:t, feito:false, criadoEm:nowISO()}, "✓ Guardado")) $("dumpTxt").value="";
+  }
+  btn.disabled=false; btn.textContent="Guardar";
+};
+function mostrarDiario(itens, ids, original){
+  $("dumpResult").innerHTML=`<div class="result">
+    <div class="t1">📖 Guardei no diário</div>
+    ${itens.map(i=>`<div style="margin-top:8px"><b style="text-transform:capitalize">${esc(diaRotulo(i.data))}</b><br>${esc(i.texto)}</div>`).join("")}
+    <div class="row" style="margin-top:14px;gap:8px">
+      <button class="btn line grow" id="resVer">Ver no diário</button>
+      <button class="btn line grow" id="resPend">Era pra resolver</button>
+    </div></div>`;
+  $("resVer").onclick=()=>{ $("dumpResult").innerHTML=""; $("dSearch").value=""; diaOff=semanaOffDe(itens[0].data); irPara("diario"); };
+  $("resPend").onclick=async()=>{
+    if(await salvar("notas", uid(), {texto:original, feito:false, criadoEm:nowISO()})){ for(const id of ids) await apagar("diario", id); $("dumpResult").innerHTML=""; toast("Guardado como anotação"); }
+  };
+}
+function mostrarResultado(a, original){
+  $("dumpResult").innerHTML=`<div class="result">
+    <div class="t1">📅 Coloquei na agenda</div>
+    <div class="t2">${esc(a.titulo)}</div>
+    <div class="muted">${esc(diaLabel(a.data))}${a.hora?" às "+esc(a.hora):""}${a.localId&&locById(a.localId)?" · "+esc(locById(a.localId).nome):""}</div>
+    ${a.paradas&&a.paradas.length? `<div class="muted" style="margin-top:4px">🚚 Roteiro: ${a.paradas.map(id=>locById(id)).filter(Boolean).map(x=>esc(x.nome)).join(" → ")}</div>`:""}
+    <a class="btn block" href="${esc(gcalURL(a))}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin-top:14px">🔔 Criar lembrete no Google Agenda</a>
+    <div class="row" style="margin-top:8px;gap:8px">
+      <button class="btn line grow" id="resEdit">Ajustar</button>
+      <button class="btn line grow" id="resNota">Não era compromisso</button>
+    </div></div>`;
+  $("resEdit").onclick=()=>{ const x=D.agenda.find(y=>y.id===a.id)||a; abrirAg(x); };
+  $("resNota").onclick=async()=>{
+    if(await salvar("notas", uid(), {texto:original, feito:false, criadoEm:nowISO()})){ await apagar("agenda", a.id); $("dumpResult").innerHTML=""; toast("Guardado como anotação"); }
+  };
+}
+$("dumpToggle").onclick=()=>{ showDumpDone=!showDumpDone; renderAnotar(); };
+function quando(iso){ if(!iso) return ""; const d=new Date(iso); const hoje=ymd(new Date())===ymd(d); return (hoje?"hoje":d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}))+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+function renderAnotar(){
+  const ab=D.notas.filter(n=>!n.feito).sort((a,b)=>(b.criadoEm||"").localeCompare(a.criadoEm||""));
+  const fe=D.notas.filter(n=>n.feito).sort((a,b)=>(b.feitoEm||"").localeCompare(a.feitoEm||"")).slice(0,20);
+  $("dumpTitle").textContent = ab.length? `Para resolver (${ab.length})` : "Para resolver";
+  $("dumpList").innerHTML = ab.length? ab.map(n=>`
+    <div class="check" data-id="${esc(n.id)}">
+      <button class="cb" data-ok aria-label="Marcar como feito">${CHECK}</button>
+      <div class="grow"><div class="txt">${esc(n.texto)}</div><div class="meta">${quando(n.criadoEm)}</div>
+        <div class="mini"><button class="pri" data-jafiz>📖 Já fiz — pro diário</button><button data-faz>📌 Pendência de fazenda</button></div></div>
+      <button class="x" data-del aria-label="Apagar">×</button>
+    </div>`).join("") : `<div class="empty">Cabeça leve 🌿 Nada pendente aqui.</div>`;
+  $("dumpToggle").classList.toggle("hidden", !fe.length);
+  $("dumpToggle").textContent = showDumpDone? "Esconder concluídas" : `Ver concluídas (${fe.length})`;
+  $("dumpDone").classList.toggle("hidden", !showDumpDone || !fe.length);
+  $("dumpDone").innerHTML = fe.map(n=>`
+    <div class="check done" data-id="${esc(n.id)}"><button class="cb on" data-undo aria-label="Desmarcar">${CHECK}</button>
+      <div class="grow"><div class="txt">${esc(n.texto)}</div><div class="meta">feito ${quando(n.feitoEm)}</div></div>
+      <button class="x" data-del aria-label="Apagar">×</button></div>`).join("");
+  const nota = el => D.notas.find(n=>n.id===el.closest(".check").dataset.id);
+  document.querySelectorAll("#v-anotar [data-ok]").forEach(b=>b.onclick=()=>{ const n=nota(b); b.classList.add("on"); salvar("notas", n.id, Object.assign(strip(n),{feito:true,feitoEm:nowISO()}), "✓ Feito!"); });
+  document.querySelectorAll("#v-anotar [data-undo]").forEach(b=>b.onclick=()=>{ const n=nota(b); salvar("notas", n.id, Object.assign(strip(n),{feito:false,feitoEm:null})); });
+  document.querySelectorAll("#v-anotar [data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.arm){ apagar("notas", nota(b).id, "Apagado"); } else { b.dataset.arm="1"; b.textContent="apagar?"; b.style.fontSize="13px"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent="×"; b.style.fontSize=""; } },3000); }
+  });
+  document.querySelectorAll("#v-anotar [data-faz]").forEach(b=>b.onclick=()=>abrirPick(nota(b)));
+  document.querySelectorAll("#v-anotar [data-jafiz]").forEach(b=>b.onclick=()=>{ const n=nota(b); abrirDia(null, {texto:n.texto, data:dataPassada(n.texto, n.criadoEm? new Date(n.criadoEm) : new Date()), notaId:n.id}); });
+}
+function abrirPick(n){
+  pickNota=n;
+  $("pickList").innerHTML = D.locais.length? locaisOrdenados().map(l=>`<button class="type" data-id="${esc(l.id)}"><span class="pin" style="width:28px;height:28px;border-radius:9px;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center">${PIN}</span><span>${esc(l.nome)}<br><span class="muted tiny">${esc(l.cidade||"")}</span></span></button>`).join("") : `<div class="empty">Cadastre uma fazenda primeiro.</div>`;
+  $("pickList").querySelectorAll("[data-id]").forEach(b=>b.onclick=async()=>{
+    const l=locById(b.dataset.id);
+    if(await salvar("pendencias", uid(), {localId:l.id, texto:pickNota.texto, feita:false, criadoEm:nowISO()})){
+      await apagar("notas", pickNota.id); toast("📌 Virou pendência de "+l.nome); fechar("shPick");
+    }
+  });
+  abrir("shPick");
+}
+
+/* ================= AGENDA ================= */
+const DIAS=["domingo","segunda","terca","quarta","quinta","sexta","sabado"];
+const norm = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+function diaLabel(s){
+  const hoje=ymd(new Date()); const am=new Date(); am.setDate(am.getDate()+1);
+  if(s===hoje) return "Hoje"; if(s===ymd(am)) return "Amanhã";
+  return parseYmd(s).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"});
+}
+function gcalURL(a){
+  const h=a.hora||"07:00"; const [y,m,d]=a.data.split("-").map(Number); const [hh,mm]=h.split(":").map(Number);
+  const s=new Date(y,m-1,d,hh,mm), e=new Date(s.getTime()+60*60000);
+  const f=x=>x.getFullYear()+pad(x.getMonth()+1)+pad(x.getDate())+"T"+pad(x.getHours())+pad(x.getMinutes())+"00";
+  const l=a.localId? locById(a.localId):null;
+  let u="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(a.titulo)+"&dates="+f(s)+"/"+f(e)+"&ctz=America/Sao_Paulo";
+  const det=[a.obs, a.hora? "" : "(sem hora definida — lembrete às 7h)", "Criado pelo Diário de Campo"].filter(Boolean).join("\n");
+  u+="&details="+encodeURIComponent(det);
+  if(l) u+="&location="+encodeURIComponent(l.nome+(l.cidade?", "+l.cidade:""));
+  return u;
+}
+/* entende a frase: primeiro pergunta ao Claude; se não der, usa regras simples */
+let samplerP=null;
+async function entender(t){
+  try{
+    if(!samplerP) samplerP = window.claude ? window.claude.use("sample") : Promise.resolve(null);
+    const sample = await samplerP;
+    if(sample){
+      const hoje=new Date();
+      const faz=D.locais.map(l=>({id:l.id,nome:l.nome,obs:l.obs||""}));
+      const prompt=`Hoje é ${hoje.toLocaleDateString("pt-BR",{weekday:"long"})}, ${ymd(hoje)} (fuso America/Sao_Paulo).
+Uma médica veterinária anotou a frase abaixo num app de rotina de trabalho. Classifique:
+- "feito": ela conta algo que JÁ FEZ (verbo no passado: fiz, fui, concluí, entreguei, fiquei, visitei, enviei…). Vai para o diário.
+- "agenda": um COMPROMISSO futuro com dia definido.
+- "nota": tarefa ou lembrete sem dia, ainda a fazer.
+Regras de data para "agenda": "próxima segunda" ou "segunda que vem" = a próxima segunda-feira depois de hoje; "amanhã" = hoje+1; um dia da semana sozinho = a próxima ocorrência depois de hoje; "dia 15" = o próximo dia 15.
+Regras de data para "feito": um dia da semana = a ocorrência mais recente até hoje (inclusive); "ontem" = hoje-1; "essa semana" sem dia, ou sem data = hoje. Se a frase conta coisas de dias diferentes, crie um item por dia.
+Para "feito", preencha "itens": [{"data":"AAAA-MM-DD","texto":"o que foi feito, frase curta e clara em português, sem a palavra do dia da semana"}].
+Locais cadastrados (use o id se a frase citar algum, mesmo pelo nome do proprietário): ${JSON.stringify(faz)}
+Responda SOMENTE com JSON neste formato:
+{"tipo":"agenda" ou "nota" ou "feito","data":"AAAA-MM-DD" ou null,"hora":"HH:MM" ou null,"titulo":"frase curta e clara em português, ex.: Visita à Fazenda do Polidoro com o Lucas","localId":"id" ou null,"paradas":[ids na ordem citada] ou [],"itens":[]}
+Se for "agenda" e a frase citar DUAS OU MAIS fazendas para o mesmo dia (ex.: entregas em várias fazendas), coloque todas em "paradas" na ordem citada, "localId" null e um título como "Entregas: Bonsucesso, São Pedro".
+Frase: """${t.slice(0,1500)}"""`;
+      const r = await sample.json(prompt, {modelTier:"quick", cache:false});
+      if(r && r.tipo==="feito"){
+        const hj=ymd(new Date());
+        const its=(Array.isArray(r.itens)?r.itens:[]).filter(i=>i && /^\d{4}-\d{2}-\d{2}$/.test(i.data||"") && String(i.texto||"").trim()).map(i=>({data: i.data>hj? hj : i.data, texto:String(i.texto).trim()}));
+        return {tipo:"feito", itens: its.length? its : [{data:dataPassada(t,new Date()), texto:t}]};
+      }
+      if(r && (r.tipo==="nota" || (r.tipo==="agenda" && /^\d{4}-\d{2}-\d{2}$/.test(r.data||"")))){
+        if(r.hora && !/^\d{2}:\d{2}$/.test(r.hora)) r.hora=null;
+        if(r.localId && !locById(r.localId)) r.localId=null;
+        r.paradas = Array.isArray(r.paradas)? r.paradas.filter(id=>locById(id)) : [];
+        return r;
+      }
+    }
+  }catch(e){ /* sem permissão, sem conexão etc.: cai nas regras simples */ }
+  return entenderLocal(t);
+}
+const PASSADO=/\b(fiz|fui|fomos|fizemos|conclui|terminei|entreguei|fiquei|ficamos|visitei|enviei|mandei|passei|atendi|levei|troquei|regulei|instalei|consertei|treinei|ontem|anteontem)\b/;
+function dataPassada(t, base){
+  const s=norm(t); const b=new Date(base); b.setHours(0,0,0,0);
+  if(/anteontem/.test(s)){ b.setDate(b.getDate()-2); return ymd(b); }
+  if(/\bontem\b/.test(s)){ b.setDate(b.getDate()-1); return ymd(b); }
+  const m=s.match(/\b(domingo|segunda|terca|quarta|quinta|sexta|sabado)\b/);
+  if(m){ const diff=(b.getDay()-DIAS.indexOf(m[1])+7)%7; b.setDate(b.getDate()-diff); return ymd(b); }
+  const d=s.match(/\b(\d{1,2})\/(\d{1,2})\b/);
+  if(d){ const x=new Date(b.getFullYear(),+d[2]-1,+d[1]); if(x>b) x.setFullYear(x.getFullYear()-1); if(!isNaN(x)) return ymd(x); }
+  return ymd(b);
+}
+function entenderLocal(t){
+  const s=norm(t); const hoje=new Date(); hoje.setHours(0,0,0,0);
+  if(PASSADO.test(s)) return {tipo:"feito", itens:[{data:dataPassada(t,new Date()), texto:t}]};
+  let d=null;
+  if(/depois de amanha/.test(s)){ d=new Date(hoje); d.setDate(d.getDate()+2); }
+  else if(/\bamanha\b/.test(s)){ d=new Date(hoje); d.setDate(d.getDate()+1); }
+  else if(/\bhoje\b/.test(s)){ d=new Date(hoje); }
+  if(!d){ const m=s.match(/\b(domingo|segunda|terca|quarta|quinta|sexta|sabado)\b/); if(m){ let diff=(DIAS.indexOf(m[1])-hoje.getDay()+7)%7; if(diff===0) diff=7; d=new Date(hoje); d.setDate(d.getDate()+diff); } }
+  if(!d){ const m=s.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/); if(m){ let y=m[3]? (+m[3]<100? 2000+ +m[3] : +m[3]) : hoje.getFullYear(); d=new Date(y,+m[2]-1,+m[1]); if(!m[3] && d<hoje) d.setFullYear(y+1); } }
+  if(!d){ const m=s.match(/\bdia (\d{1,2})\b/); if(m){ d=new Date(hoje.getFullYear(),hoje.getMonth(),+m[1]); if(d<hoje) d.setMonth(d.getMonth()+1); } }
+  if(!d || isNaN(d)) return {tipo:"nota"};
+  let hora=null; const h=s.replace(/\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g,"").match(/\b(\d{1,2})\s*(?:h|:)\s*(\d{2})?\b/);
+  if(h && +h[1]<24) hora=pad(+h[1])+":"+pad(h[2]? +h[2] : 0);
+  const achados=[];
+  D.locais.forEach(l=>{
+    const nomes=[norm(l.nome).replace(/^(fazenda|faz\.?|sitio|escritorio)\s+(d[aoe]s?\s+)?/,"").trim()];
+    const dn=norm(dono(l)).split(" ")[0]; if(dn && dn.length>2) nomes.push(dn);
+    let pos=-1; nomes.forEach(n=>{ if(!n) return; const m=s.search(new RegExp("\\b"+n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b")); if(m>=0 && (pos<0||m<pos)) pos=m; });
+    if(pos>=0) achados.push({id:l.id,pos,len:nomes[0].length});
+  });
+  achados.sort((a,b)=>a.pos-b.pos);
+  const uniq=[]; achados.forEach(a=>{ if(!uniq.includes(a.id)) uniq.push(a.id); });
+  const paradas = uniq.length>=2? uniq : [];
+  return {tipo:"agenda", data:ymd(d), hora, titulo:t.charAt(0).toUpperCase()+t.slice(1), localId: uniq.length===1? uniq[0] : null, paradas};
+}
+let showAgPass=false;
+function agItemHTML(a, comData){
+  const l=a.localId? locById(a.localId):null;
+  return `<div class="check ${a.feito?"done":""}" data-id="${esc(a.id)}">
+    <button class="cb ${a.feito?"on":""}" data-agok aria-label="Concluir">${CHECK}</button>
+    <div class="grow" data-agedit style="cursor:pointer">
+      <div class="txt">${a.hora?`<span class="agtime">${esc(a.hora)}</span>`:""}${esc(a.titulo)}</div>
+      <div class="meta">${comData? esc(diaLabel(a.data))+" · ":""}${l?"📍 "+esc(l.nome):""}${a.obs?(l?" · ":"")+esc(a.obs):""}</div>
+      ${a.paradas&&a.paradas.length? `<div class="meta">🚚 ${a.paradas.map(id=>locById(id)).filter(Boolean).map(x=>esc(x.nome)).join(" → ")}</div>`:""}
+      ${a.feito?"":`<div class="mini"><a class="pri" href="${esc(gcalURL(a))}" target="_blank" rel="noopener">🔔 Lembrete no Google Agenda</a></div>`}
+    </div></div>`;
+}
+function bindAg(root){
+  root.querySelectorAll("[data-agok]").forEach(b=>b.onclick=()=>{ const a=D.agenda.find(x=>x.id===b.closest(".check").dataset.id); if(!a) return; salvar("agenda", a.id, Object.assign(strip(a),{feito:!a.feito}), a.feito?null:"✓ Feito! Foi pro diário"); });
+  root.querySelectorAll("[data-agedit]").forEach(el=>el.onclick=e=>{ if(e.target.closest("a")) return; abrirAg(D.agenda.find(x=>x.id===el.closest(".check").dataset.id)); });
+}
+const ordAg = arr => arr.slice().sort((a,b)=>(a.data+(a.hora||"99")).localeCompare(b.data+(b.hora||"99")));
+function renderAgenda(){
+  const hoje=ymd(new Date());
+  const fut=ordAg(D.agenda.filter(a=>a.data>=hoje));
+  const pas=ordAg(D.agenda.filter(a=>a.data<hoje)).reverse().slice(0,30);
+  if(!fut.length){ $("agLista").innerHTML=`<div class="tip" style="margin-top:16px">Nenhum compromisso à frente.<br><br>Experimente na aba <b>Anotar</b>: <i>“quinta às 9h preventiva na Fazenda do Lago com o Lucas”</i> — o app entende o dia e a hora e coloca aqui.</div>`; }
+  else {
+    let html="", dia="";
+    fut.forEach(a=>{ if(a.data!==dia){ if(dia) html+="</div>"; dia=a.data; html+=`<h2 style="text-transform:none;letter-spacing:0;font-size:16px;color:var(--brand)">${esc(diaLabel(a.data))}</h2><div class="card">`; } html+=agItemHTML(a,false); });
+    $("agLista").innerHTML=html+"</div>";
+  }
+  bindAg($("agLista"));
+  $("agToggle").classList.toggle("hidden", !pas.length);
+  $("agToggle").textContent = showAgPass? "Esconder anteriores" : `Ver anteriores (${pas.length})`;
+  $("agPassados").classList.toggle("hidden", !showAgPass || !pas.length);
+  $("agPassados").innerHTML = pas.length? `<div class="card">${pas.map(a=>agItemHTML(a,true)).join("")}</div>`:"";
+  bindAg($("agPassados"));
+}
+$("agToggle").onclick=()=>{ showAgPass=!showAgPass; renderAgenda(); };
+$("agNovo").onclick=()=>abrirAg(null);
+let editAg=null, delAgArm=false;
+function atualizaGcal(){ const t=$("aTit").value.trim()||"Compromisso"; const d=$("aData").value; $("aGcal").classList.toggle("hidden", !d); if(d) $("aGcal").href=gcalURL({titulo:t,data:d,hora:$("aHora").value,localId:$("aLocal").value,obs:$("aObs").value.trim()}); }
+["aTit","aData","aHora","aLocal","aObs"].forEach(id=>$(id).addEventListener("input",atualizaGcal));
+$("aLocal").addEventListener("change",atualizaGcal);
+function abrirAg(a){
+  editAg=a||null; delAgArm=false;
+  $("agTitulo").textContent = a? "Compromisso" : "Novo compromisso";
+  $("aLocal").innerHTML=`<option value="">—</option>`+locaisOrdenados().map(l=>`<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join("");
+  $("aTit").value=a?a.titulo:""; $("aData").value=a?a.data:ymd(new Date()); $("aHora").value=a?(a.hora||""):""; $("aLocal").value=a?(a.localId||""):""; $("aObs").value=a?(a.obs||""):"";
+  $("aDel").classList.toggle("hidden",!a); $("aDel").textContent="Excluir";
+  paradasSel = a&&a.paradas? a.paradas.filter(id=>locById(id)) : [];
+  montarParadas(); atualizaGcal(); abrir("shAg");
+}
+let paradasSel=[];
+function montarParadas(){
+  $("aParadas").innerHTML=locaisOrdenados().map(l=>{ const i=paradasSel.indexOf(l.id);
+    return `<button type="button" class="pchip ${i>=0?"on":""}" data-id="${esc(l.id)}"><span class="fdot" style="background:var(--f${corDe(l)})"></span>${esc(l.nome)}<span class="tiny muted" style="font-weight:400">${esc(dono(l))}</span>${i>=0?`<span class="ord">${i+1}º</span>`:""}</button>`; }).join("");
+  $("aParadas").querySelectorAll(".pchip").forEach(b=>b.onclick=()=>{ const id=b.dataset.id, i=paradasSel.indexOf(id); if(i>=0) paradasSel.splice(i,1); else paradasSel.push(id); montarParadas(); });
+}
+
+$("aSalvar").onclick=async()=>{
+  const t=$("aTit").value.trim(); if(!t){ toast("Escreva o compromisso"); return; }
+  if(!$("aData").value){ toast("Escolha o dia"); return; }
+  $("aSalvar").disabled=true;
+  const obj={titulo:t, data:$("aData").value, hora:$("aHora").value, localId:$("aLocal").value, paradas:paradasSel.slice(), obs:$("aObs").value.trim(), feito: editAg? !!editAg.feito : false, textoOriginal: editAg? (editAg.textoOriginal||"") : "", criadoEm: editAg? (editAg.criadoEm||nowISO()) : nowISO()};
+  if(await salvar("agenda", editAg? editAg.id : uid(), obj, "✓ Agenda atualizada")){ fechar("shAg"); if(view==="anotar") $("dumpResult").innerHTML=""; }
+  $("aSalvar").disabled=false;
+};
+$("aDel").onclick=async()=>{
+  if(!editAg) return;
+  if(!delAgArm){ delAgArm=true; $("aDel").textContent="Toque de novo"; return; }
+  if(await apagar("agenda", editAg.id, "Compromisso excluído")){ fechar("shAg"); if(view==="anotar") $("dumpResult").innerHTML=""; }
+};
+
+/* ================= DIÁRIO ================= */
+let diaOff=0, editDia=null, delDiaArm=false, diaNota=null;
+function diaRotulo(s){
+  const h=new Date(); const o=new Date(); o.setDate(o.getDate()-1);
+  const base=parseYmd(s).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"});
+  if(s===ymd(h)) return "Hoje · "+base; if(s===ymd(o)) return "Ontem · "+base; return base;
+}
+function semanaOffDe(s){ const a=inicioSemana(0), d=parseYmd(s); const dow=(d.getDay()+6)%7; d.setDate(d.getDate()-dow); return Math.round((d-a)/(7*864e5)); }
+const hmISO = iso => { const d=new Date(iso); return pad(d.getHours())+":"+pad(d.getMinutes()); };
+function itensDiario(){
+  const it=[];
+  D.diario.forEach(x=>it.push({k:"dia", id:x.id, data:x.data, hora:"", ico:"📖", titulo:x.texto, sub:""}));
+  D.registros.forEach(r=>{ const t=tipoInfo(r.tipo); const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:""):""; const c=localCidade(r);
+    it.push({k:"reg", id:r.id, data:r.data, hora:r.inicio||"", ico:"📍", titulo:localNome(r)+" — "+t.n, sub:[[h,c].filter(Boolean).join(" · "), r.descricao || "✍️ toque para contar o que fez"].filter(Boolean).join("\n")}); });
+  D.agenda.filter(a=>a.feito).forEach(a=>{ const l=a.localId? locById(a.localId):null; it.push({k:"ag", id:a.id, data:a.data, hora:a.hora||"", ico:"📅", titulo:a.titulo, sub:"Compromisso cumprido"+(l?" · "+l.nome:"")}); });
+  D.pendencias.filter(p=>p.feita&&p.feitaEm).forEach(p=>{ const l=locById(p.localId); it.push({k:"pend", id:p.id, data:ymd(new Date(p.feitaEm)), hora:hmISO(p.feitaEm), ico:"📌", titulo:p.texto, sub:"Pendência resolvida"+(l?" · "+l.nome:"")}); });
+  D.qualidade.forEach(q=>{ if(!q.atualizadoEm) return; const l=locById(q.localId); it.push({k:"leite", id:q.id, data:ymd(new Date(q.atualizadoEm)), hora:hmISO(q.atualizadoEm), ico:"🥛", titulo:"CCS/CPP de "+fmtMes(q.mes)+(l?" · "+l.nome:""), sub:[q.ccs!=null?"CCS "+fmtNum(q.ccs):"", q.cbt!=null?"CPP "+fmtNum(q.cbt):""].filter(Boolean).join(" · ")}); });
+  D.producao.forEach(p=>{ const l=locById(p.localId); it.push({k:"prod", id:p.id, data:p.data, hora:"", ico:"🐄", titulo:"Produção "+fmtL(p.litros)+(l?" · "+l.nome:""), sub:""}); });
+  D.notas.filter(n=>n.feito&&n.feitoEm).forEach(n=>it.push({k:"nota", id:n.id, data:ymd(new Date(n.feitoEm)), hora:hmISO(n.feitoEm), ico:"✅", titulo:n.texto, sub:"Anotação resolvida"}));
+  return it;
+}
+function marca(txt, q){
+  const e=esc(txt); if(!q) return e;
+  const n=norm(txt); if(n.length!==txt.length) return e;
+  const i=n.indexOf(q); if(i<0) return e;
+  return esc(txt.slice(0,i))+"<mark>"+esc(txt.slice(i,i+q.length))+"</mark>"+esc(txt.slice(i+q.length));
+}
+function renderDiario(){
+  const q=norm($("dSearch").value.trim());
+  let it=itensDiario();
+  $("dWeek").classList.toggle("hidden", !!q);
+  if(!q){
+    const s=inicioSemana(diaOff), e=new Date(s); e.setDate(s.getDate()+6);
+    const a=ymd(s), b=ymd(e); it=it.filter(x=>x.data>=a && x.data<=b);
+    const f=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"});
+    $("dLabel").textContent = diaOff===0? "Esta semana" : diaOff===-1? "Semana passada" : "Semana de "+f(s);
+    $("dSub").textContent = f(s)+" – "+f(e);
+    $("dNext").style.opacity = diaOff>=0? .3 : 1;
+  } else it=it.filter(x=>norm(x.titulo+" "+x.sub).includes(q)).slice(0,300);
+  const dias=[...new Set(it.map(x=>x.data))].sort().reverse();
+  if(!it.length){
+    $("dLista").innerHTML = q? `<div class="card" style="margin-top:14px"><div class="empty">Nada encontrado para “${esc($("dSearch").value.trim())}”.</div></div>`
+      : `<div class="tip" style="margin-top:16px">Nada no diário nesta semana.<br><br>Na aba <b>Anotar</b>, escreva o que fez do jeito que falaria — <i>“terça fiz a visita na Fazenda do Lago com o Emerson”</i> — e vem pra cá no dia certo. Atendimentos, CCS/CPP lançados, pendências resolvidas e compromissos cumpridos também aparecem aqui sozinhos.</div>`;
+    return;
+  }
+  $("dLista").innerHTML = dias.map(d=>{
+    const rs=it.filter(x=>x.data===d).sort((x,y)=>(x.hora||"").localeCompare(y.hora||""));
+    return `<h2 style="text-transform:none;letter-spacing:0;font-size:16px;color:var(--brand)">${esc(diaRotulo(d))}</h2><div class="card">`+
+      rs.map(x=>`<div class="ditem ${["dia","reg","ag"].includes(x.k)?"click":""}" data-k="${x.k}" data-id="${esc(x.id)}"><div class="ico">${x.ico}</div>
+        <div class="grow"><div class="row between" style="align-items:flex-start"><span class="tt">${marca(x.titulo,q)}</span>${x.hora?`<span class="muted small" style="white-space:nowrap">${esc(x.hora)}</span>`:""}</div>
+        ${x.sub?`<div class="ss">${marca(x.sub,q)}</div>`:""}</div></div>`).join("")+`</div>`;
+  }).join("");
+  $("dLista").querySelectorAll(".ditem.click").forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k, id=el.dataset.id;
+    if(k==="dia") abrirDia(D.diario.find(x=>x.id===id));
+    else if(k==="reg") abrirRegistro(D.registros.find(x=>x.id===id));
+    else if(k==="ag") abrirAg(D.agenda.find(x=>x.id===id));
+  });
+}
+let dsT; $("dSearch").addEventListener("input",()=>{ clearTimeout(dsT); dsT=setTimeout(renderDiario,150); });
+$("dPrev").onclick=()=>{ diaOff--; renderDiario(); };
+$("dNext").onclick=()=>{ if(diaOff<0){ diaOff++; renderDiario(); } };
+$("dNovo").onclick=()=>abrirDia(null);
+function abrirDia(x, pre){
+  editDia=x||null; delDiaArm=false; diaNota=pre&&pre.notaId? pre.notaId : null;
+  $("diaTitulo").textContent = x? "No diário" : "Escrever no diário";
+  $("dData").value = x? x.data : (pre&&pre.data) || ymd(new Date());
+  $("dTxt").value = x? x.texto : (pre&&pre.texto) || "";
+  $("dDel").classList.toggle("hidden", !x); $("dDel").textContent="Excluir";
+  abrir("shDia");
+}
+$("dSalvar").onclick=async()=>{
+  const t=$("dTxt").value.trim(); if(!t){ toast("Escreva o que você fez"); return; }
+  const d=$("dData").value; if(!d){ toast("Escolha o dia"); return; }
+  $("dSalvar").disabled=true;
+  const obj={data:d, texto:t, textoOriginal: editDia? (editDia.textoOriginal||"") : t, criadoEm: editDia? (editDia.criadoEm||nowISO()) : nowISO(), atualizadoEm:nowISO()};
+  if(await salvar("diario", editDia? editDia.id : uid(), obj, "📖 Guardado no diário")){
+    if(diaNota){ await apagar("notas", diaNota); diaNota=null; }
+    fechar("shDia");
+  }
+  $("dSalvar").disabled=false;
+};
+$("dDel").onclick=async()=>{
+  if(!editDia) return;
+  if(!delDiaArm){ delDiaArm=true; $("dDel").textContent="Toque de novo"; return; }
+  if(await apagar("diario", editDia.id, "Apagado do diário")) fechar("shDia");
+};
+
+/* ================= FAZENDAS ================= */
+function mostrarLista(){ $("fzLista").classList.remove("hidden"); $("fzDetalhe").classList.add("hidden"); }
+function renderFazendas(){
+  if(fazAtual && locById(fazAtual)){ renderDetalhe(); return; }
+  fazAtual=null; mostrarLista();
+  const ult={}; D.registros.forEach(r=>{ if(r.localId && (!ult[r.localId]||r.data>ult[r.localId])) ult[r.localId]=r.data; });
+  const mA=mesAnterior();
+  $("fzCards").innerHTML = D.locais.length? locaisOrdenados().map(l=>{
+    const np=pendAbertas(l.id).length, nv=visitas(l.id).length;
+    const fl=ehFazenda(l) && !temLeite(l.id,mA);
+    return `<button class="farm" data-id="${esc(l.id)}" style="width:100%;min-height:0;margin-bottom:10px;flex-direction:row;align-items:center;gap:12px">
+      <span class="fdot" style="background:var(--f${corDe(l)})"></span>
+      <span class="grow"><b>${esc(l.nome)}</b><span>${esc(l.cidade||"")}${l.obs? " · "+esc(l.obs):""}</span><br>
+      <span>${nv} atendimento${nv===1?"":"s"}${ult[l.id]? " · último "+fmtData(ult[l.id]):""}</span>
+      ${(()=>{ const up=ehFazenda(l)&&ultProd(l.id); return up? `<br><span>🐄 ${fmtL(up.litros)} · ${fmtData(up.data)}</span>`:""; })()}
+      ${fl?`<br><span class="flag" style="margin-top:4px">🥛 falta ${fmtMes(mA)}</span>`:""}</span>
+      ${np?`<span class="flag">📌 ${np}</span>`:""}<span class="muted" style="font-size:22px">›</span></button>`;
+  }).join("") : `<div class="card"><div class="empty">Nenhum local ainda.</div></div>`;
+  $("fzCards").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{ fazAtual=b.dataset.id; const l=locById(fazAtual); fazTab = (ehFazenda(l) && !temLeite(l.id,mA))? "leite" : "pend"; $("scroller").scrollTo(0,0); renderDetalhe(); });
+}
+$("fzVoltar").onclick=()=>{ fazAtual=null; renderFazendas(); $("scroller").scrollTo(0,0); };
+$("btnNovoLocal").onclick=()=>abrirLocal(null);
+$("fzEditar").onclick=()=>abrirLocal(locById(fazAtual));
+$("fzSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ fazTab=b.dataset.t; renderDetalhe(); });
+
+let showPendDone=false;
+function renderDetalhe(){
+  const l=locById(fazAtual); if(!l){ fazAtual=null; renderFazendas(); return; }
+  $("fzLista").classList.add("hidden"); $("fzDetalhe").classList.remove("hidden");
+  $("fzNome").textContent=l.nome;
+  $("fzInfo").textContent=[l.cidade,l.obs].filter(Boolean).join(" · ");
+  const temMaps = l.mapsLink && /^https?:\/\//.test(l.mapsLink);
+  $("fzMaps").classList.toggle("hidden", !temMaps); if(temMaps) $("fzMaps").href=l.mapsLink;
+  $("fzSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.t===fazTab));
+  ["pend","hist","leite"].forEach(t=>$("t-"+t).classList.toggle("hidden", t!==fazTab));
+  if(fazTab==="pend") renderPend(l); else if(fazTab==="hist") renderHist(l); else renderLeite(l);
+}
+
+function renderPend(l){
+  const ab=D.pendencias.filter(p=>p.localId===l.id && !p.feita).sort((a,b)=>(a.criadoEm||"").localeCompare(b.criadoEm||""));
+  const fe=D.pendencias.filter(p=>p.localId===l.id && p.feita).sort((a,b)=>(b.feitaEm||"").localeCompare(a.feitaEm||""));
+  $("pendList").innerHTML = ab.length? ab.map(p=>`
+    <div class="check" data-id="${esc(p.id)}"><button class="cb" data-ok aria-label="Resolvida">${CHECK}</button>
+      <div class="grow"><div class="txt">${esc(p.texto)}</div><div class="meta">desde ${quando(p.criadoEm)}</div></div>
+      <button class="x" data-del aria-label="Apagar">×</button></div>`).join("") : `<div class="empty">Nenhuma pendência nesta fazenda ✨</div>`;
+  $("pendToggle").classList.toggle("hidden", !fe.length);
+  $("pendToggle").textContent = showPendDone? "Esconder resolvidas" : `Ver resolvidas (${fe.length})`;
+  $("pendDone").classList.toggle("hidden", !showPendDone || !fe.length);
+  $("pendDone").innerHTML = fe.map(p=>`<div class="check done" data-id="${esc(p.id)}"><button class="cb on" data-undo aria-label="Reabrir">${CHECK}</button>
+      <div class="grow"><div class="txt">${esc(p.texto)}</div><div class="meta">resolvida ${quando(p.feitaEm)}</div></div>
+      <button class="x" data-del aria-label="Apagar">×</button></div>`).join("");
+  const pend = el => D.pendencias.find(p=>p.id===el.closest(".check").dataset.id);
+  document.querySelectorAll("#t-pend [data-ok]").forEach(b=>b.onclick=()=>{ const p=pend(b); b.classList.add("on"); salvar("pendencias", p.id, Object.assign(strip(p),{feita:true,feitaEm:nowISO()}), "✓ Resolvida!"); });
+  document.querySelectorAll("#t-pend [data-undo]").forEach(b=>b.onclick=()=>{ const p=pend(b); salvar("pendencias", p.id, Object.assign(strip(p),{feita:false,feitaEm:null})); });
+  document.querySelectorAll("#t-pend [data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.arm){ apagar("pendencias", pend(b).id, "Apagada"); } else { b.dataset.arm="1"; b.textContent="apagar?"; b.style.fontSize="13px"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent="×"; b.style.fontSize=""; } },3000); }
+  });
+}
+$("pendToggle").onclick=()=>{ showPendDone=!showPendDone; renderDetalhe(); };
+async function addPend(){
+  const t=$("pendTxt").value.trim(); if(!t||!fazAtual) return;
+  $("pendAdd").disabled=true;
+  if(await salvar("pendencias", uid(), {localId:fazAtual, texto:t, feita:false, criadoEm:nowISO()}, "📌 Pendência adicionada")) $("pendTxt").value="";
+  $("pendAdd").disabled=false;
+}
+$("pendAdd").onclick=addPend;
+$("pendTxt").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addPend(); } });
+
+function renderHist(l){
+  const rs=visitas(l.id).slice().sort((a,b)=>(b.data+(b.inicio||"")).localeCompare(a.data+(a.inicio||"")));
+  $("hTot").textContent=rs.length;
+  $("hUlt").textContent=rs.length? fmtData(rs[0].data) : "—";
+  let html="", ultMes="";
+  rs.forEach(r=>{
+    const m=r.data.slice(0,7);
+    if(m!==ultMes){ ultMes=m; const d=parseYmd(r.data); html+=`<div class="daytitle">${d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</div>`; }
+    html+=entryHTML(Object.assign({},r,{_d:true})).replace('<span class="place">'+esc(localNome(r))+'</span>','<span class="place">'+parseYmd(r.data).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"})+'</span>');
+  });
+  $("histList").innerHTML = rs.length? html : `<div class="empty">Ainda não há atendimentos registrados aqui.</div>`;
+  bindEntries($("histList"));
+}
+
+/* ---- qualidade do leite ---- */
+function renderProd(l){
+  if(!$("pData").value) $("pData").value=ymd(new Date());
+  const ps=D.producao.filter(p=>p.localId===l.id).sort((a,b)=>b.data.localeCompare(a.data));
+  $("pUlt").textContent = ps.length? "Última: "+fmtL(ps[0].litros) : "";
+  $("pLista").innerHTML = ps.length? `<table class="tb" style="margin-top:12px"><thead><tr><th>Dia</th><th class="n">Litros/dia</th><th class="n">Variação</th></tr></thead><tbody>${ps.slice(0,12).map((p,i)=>{ const ant=ps[i+1]; const v=ant&&ant.litros? ((p.litros-ant.litros)/ant.litros*100) : null;
+    return `<tr><td>${fmtData(p.data)}</td><td class="n">${fmtNum(p.litros)}</td><td class="n muted">${v==null?"—":(v>0?"+":"")+fmtNum(v)+"%"}</td></tr>`; }).join("")}</tbody></table>` : `<p class="muted small" style="margin:10px 2px 0">Anote aqui sempre que perguntar ao produtor. Na próxima vez que alguém perguntar, a resposta está aqui.</p>`;
+}
+$("pSalvar").onclick=async()=>{
+  const d=$("pData").value, lt=$("pLitros").value; if(!d||lt===""){ toast("Preencha dia e litros"); return; }
+  $("pSalvar").disabled=true;
+  if(await salvar("producao", fazAtual+"_"+d, {localId:fazAtual, data:d, litros:Number(lt), atualizadoEm:nowISO()}, "🐄 Produção salva")) $("pLitros").value="";
+  $("pSalvar").disabled=false;
+};
+function renderLeite(l){
+  renderProd(l);
+  if(!$("qMes").value){ $("qMes").value=mesAnterior(); }
+  const qs=D.qualidade.filter(q=>q.localId===l.id).sort((a,b)=>a.mes.localeCompare(b.mes));
+  if(!qs.length){ $("qCharts").innerHTML=`<div class="tip" style="margin-top:14px">Lance o resultado mensal de <b>CCS</b> e <b>CPP</b> do laticínio para acompanhar a evolução desta fazenda num gráfico. A linha tracejada mostra o limite da IN 76.</div>`; return; }
+  $("qCharts").innerHTML = `
+    <h2>Contagem de células somáticas</h2>
+    <div class="card pad">${chartHTML("ccs",qs,"mil cél/mL")}</div>
+    <h2>Contagem padrão em placas (CPP)</h2>
+    <div class="card pad">${chartHTML("cbt",qs,"mil UFC/mL")}</div>
+    <h2>Resultados</h2>
+    <div class="card pad" style="padding-top:6px"><table class="tb"><thead><tr><th>Mês</th><th class="n">CCS</th><th class="n">CPP</th><th></th></tr></thead><tbody>
+    ${qs.slice().reverse().map(q=>`<tr><td>${fmtMes(q.mes)}${q.obs?`<div class="tiny muted">${esc(q.obs)}</div>`:""}</td>
+      <td class="n ${q.ccs!=null&&q.ccs>LIM.ccs?"over":""}">${q.ccs!=null?fmtNum(q.ccs):"—"}</td>
+      <td class="n ${q.cbt!=null&&q.cbt>LIM.cbt?"over":""}">${q.cbt!=null?fmtNum(q.cbt):"—"}</td>
+      <td class="n"><button class="x" data-qe="${esc(q.id)}" style="font-size:15px">✏️</button></td></tr>`).join("")}
+    </tbody></table><p class="tiny muted" style="margin:10px 0 0">Valores em vermelho estão acima do limite da IN 76 (CCS 500 mil · CPP 300 mil).</p></div>`;
+  bindCharts();
+  $("qCharts").querySelectorAll("[data-qe]").forEach(b=>b.onclick=()=>{
+    const q=D.qualidade.find(x=>x.id===b.dataset.qe); if(!q) return;
+    $("qMes").value=q.mes; $("qCcs").value=q.ccs??""; $("qCbt").value=q.cbt??""; $("qObs").value=q.obs||"";
+    $("scroller").scrollTo({top:0,behavior:"smooth"}); toast("Edite e toque em Salvar");
+  });
+}
+function chartHTML(key, qs, unit){
+  const pts=qs.filter(q=>q[key]!=null && q[key]!=="");
+  if(!pts.length) return `<div class="empty">Sem dados de ${(key==="cbt"?"CPP":key.toUpperCase())} ainda.</div>`;
+  const W=340,H=170,L=40,R=12,T=14,B=26, lim=LIM[key];
+  const maxV=Math.max(lim*1.15, ...pts.map(p=>+p[key]))*1.08;
+  const n=pts.length, x=i=> n===1? L+(W-L-R)/2 : L+i*(W-L-R)/(n-1), y=v=> T+(H-T-B)*(1-v/maxV);
+  const step=niceStep(maxV/4); let grid="";
+  for(let v=0; v<=maxV; v+=step){ grid+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${fmtNum(v)}</text>`; }
+  const every=Math.ceil(n/6);
+  const xl=pts.map((p,i)=> (i%every===0||i===n-1)? `<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--muted)">${fmtMes(p.mes)}</text>`:"").join("");
+  const path=pts.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(+p[key]).toFixed(1)).join(" ");
+  const dots=pts.map((p,i)=>`<g class="pt" data-cap="${fmtMes(p.mes)}: <b>${fmtNum(p[key])}</b> ${unit}${+p[key]>lim?" — acima do limite":""}" data-i="${i}">
+    <circle cx="${x(i)}" cy="${y(+p[key])}" r="16" fill="transparent"/>
+    <circle class="dot" cx="${x(i)}" cy="${y(+p[key])}" r="4.5" fill="var(--brand)" stroke="var(--card)" stroke-width="2"/></g>`).join("");
+  const last=pts[n-1];
+  return `<div class="chart" data-key="${key}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${(key==="cbt"?"CPP":key.toUpperCase())} por mês">
+    ${grid}
+    <line x1="${L}" x2="${W-R}" y1="${y(lim)}" y2="${y(lim)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <path d="${path}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${xl}${dots}</svg>
+    <div class="cap">Último (${fmtMes(last.mes)}): <b>${fmtNum(last[key])}</b> ${unit} <span class="muted tiny">· toque nos pontos</span></div>
+    <div class="tiny muted" style="display:flex;align-items:center;gap:6px;margin-top:4px"><svg width="22" height="6"><line x1="0" x2="22" y1="3" y2="3" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/></svg>limite IN 76: ${lim} mil</div></div>`;
+}
+function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw))); const f=raw/p; return (f<=1?1:f<=2?2:f<=5?5:10)*p; }
+function bindCharts(){
+  document.querySelectorAll(".chart").forEach(c=>{
+    c.querySelectorAll(".pt").forEach(g=>{
+      const act=()=>{ c.querySelectorAll(".dot").forEach(d=>d.setAttribute("r","4.5")); g.querySelector(".dot").setAttribute("r","7"); c.querySelector(".cap").innerHTML=g.dataset.cap; };
+      g.addEventListener("click",act); g.addEventListener("mouseenter",act);
+    });
+  });
+}
+$("qSalvar").onclick=async()=>{
+  const mes=$("qMes").value; if(!mes){ toast("Escolha o mês"); return; }
+  const ccs=$("qCcs").value===""? null : Number($("qCcs").value), cbt=$("qCbt").value===""? null : Number($("qCbt").value);
+  if(ccs==null && cbt==null){ toast("Preencha CCS ou CPP"); return; }
+  $("qSalvar").disabled=true;
+  if(await salvar("qualidade", fazAtual+"_"+mes, {localId:fazAtual, mes, ccs, cbt, obs:$("qObs").value.trim(), atualizadoEm:nowISO()}, "✓ Resultado de "+fmtMes(mes)+" salvo")){
+    $("qCcs").value=""; $("qCbt").value=""; $("qObs").value="";
+  }
+  $("qSalvar").disabled=false;
+};
+
+/* ---- cadastro de local ---- */
+let editLoc=null, delLocArm=false;
+function abrirLocal(l){
+  editLoc=l||null; delLocArm=false;
+  $("locTitulo").textContent = l? "Editar local" : "Novo local";
+  $("lNome").value=l?l.nome:""; $("lCidade").value=l?(l.cidade||""):""; $("lCat").value=l?(l.categoria||"Fazenda / cliente"):"Fazenda / cliente";
+  $("lMaps").value=l?(l.mapsLink||""):""; $("lObs").value=l?(l.obs||""):"";
+  $("lDel").classList.toggle("hidden", !l); $("lDel").textContent="Excluir";
+  if(l) corSel=corDe(l); else { const usadas=D.locais.map(corDe); corSel=[...Array(10).keys()].find(i=>!usadas.includes(i)) ?? (D.locais.length%10); }
+  locItens=new Set(l&&l.padrao? l.padrao : []); montarLocItens();
+  montarCores(); abrir("shLoc");
+}
+let locItens=new Set();
+function montarLocItens(){
+  $("lItens").innerHTML=ITENS.map((it,i)=>`<button type="button" class="item ${locItens.has(it)?"on":""}" data-i="${i}"><span class="cb ${locItens.has(it)?"on":""}">${CHECK}</span>${esc(it)}</button>`).join("");
+  $("lItens").querySelectorAll(".item").forEach(b=>b.onclick=()=>{ const it=ITENS[+b.dataset.i]; locItens.has(it)? locItens.delete(it) : locItens.add(it); montarLocItens(); });
+}
+let corSel=0;
+function montarCores(){
+  $("lCores").innerHTML=[...Array(10).keys()].map(i=>`<button type="button" class="${i===corSel?"on":""}" data-c="${i}" style="background:var(--f${i})" aria-label="Cor ${i+1}"></button>`).join("");
+  $("lCores").querySelectorAll("button").forEach(b=>b.onclick=()=>{ corSel=+b.dataset.c; montarCores(); });
+}
+
+$("lSalvar").onclick=async()=>{
+  const nome=$("lNome").value.trim(); if(!nome){ toast("Dê um nome ao local"); return; }
+  $("lSalvar").disabled=true;
+  if(await salvar("locais", editLoc? editLoc.id : uid(), {nome, cidade:$("lCidade").value.trim(), categoria:$("lCat").value, mapsLink:$("lMaps").value.trim(), obs:$("lObs").value.trim(), cor:corSel, padrao:ITENS.filter(i=>locItens.has(i)), criadoEm: editLoc? (editLoc.criadoEm||"") : nowISO()}, "✓ Local salvo")) fechar("shLoc");
+  $("lSalvar").disabled=false;
+};
+$("lDel").onclick=async()=>{
+  if(!editLoc) return;
+  if(!delLocArm){ delLocArm=true; $("lDel").textContent="Toque de novo"; return; }
+  if(await apagar("locais", editLoc.id, "Local excluído (registros antigos mantidos)")){ fechar("shLoc"); fazAtual=null; renderFazendas(); }
+};
+
+/* ================= SEMANA ================= */
+let semOff=0;
+function inicioSemana(off){ const d=new Date(); d.setHours(0,0,0,0); const dow=(d.getDay()+6)%7; d.setDate(d.getDate()-dow+off*7); return d; }
+function dadosSemana(){
+  const s=inicioSemana(semOff); const dias=[...Array(7)].map((_,i)=>{ const d=new Date(s); d.setDate(s.getDate()+i); return d; });
+  const keys=dias.map(ymd); return {dias, keys, lst:ordenar(D.registros.filter(r=>keys.includes(r.data)))};
+}
+function hbars(map, colorFn){
+  const arr=Object.entries(map).sort((a,b)=>b[1].n-a[1].n);
+  if(!arr.length) return `<div class="empty">Sem registros nesta semana.</div>`;
+  const max=Math.max(...arr.map(a=>a[1].n));
+  return arr.map(([k,v])=>`<div class="hbar"><div class="lbl"><span>${esc(v.label)}</span><span class="muted" style="white-space:nowrap">${v.n}×${v.min? " · "+fmtH(v.min):""}</span></div>
+    <div class="track"><div class="fill" style="width:${(v.n/max*100).toFixed(1)}%;background:var(${colorFn(k)})"></div></div></div>`).join("");
+}
+function renderSemana(){
+  const {dias, keys, lst}=dadosSemana();
+  const f=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"});
+  $("wLabel").textContent = semOff===0? "Esta semana" : semOff===-1? "Semana passada" : `Semana de ${f(dias[0])}`;
+  $("wSub").textContent = `${f(dias[0])} – ${f(dias[6])}`;
+  $("wNext").style.opacity = semOff>=0? .3:1;
+  const tot=lst.reduce((s,r)=>s+minutos(r.inicio,r.fim),0);
+  $("sAt").textContent=lst.length; $("sH").textContent=fmtH(tot); $("sL").textContent=new Set(lst.map(r=>r.localId||r.localNome)).size;
+  const pt={}, pl={};
+  lst.forEach(r=>{ const m=minutos(r.inicio,r.fim), t=tipoInfo(r.tipo);
+    (pt[t.k] ||= {label:t.n,n:0,min:0}); pt[t.k].n++; pt[t.k].min+=m;
+    const lk=r.localId||r.localNome||"?"; (pl[lk] ||= {label:localNome(r),n:0,min:0}); pl[lk].n++; pl[lk].min+=m; });
+  $("porTipo").innerHTML=hbars(pt, k=>tipoInfo(k).c);
+  $("porLocal").innerHTML=hbars(pl, ()=>"--brand");
+  const pi={}; lst.forEach(r=>(r.feitos||[]).forEach(f=>{ (pi[f] ||= {label:f,n:0,min:0}); pi[f].n++; }));
+  $("porItem").innerHTML=hbars(pi, ()=>"--brand");
+  const dd=$("diaADia");
+  dd.innerHTML = lst.length? dias.map((d,i)=>{ const rs=lst.filter(r=>r.data===keys[i]); if(!rs.length) return "";
+    return `<div class="daytitle">${d.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric"})}</div>`+rs.map(r=>entryHTML(r)).join(""); }).join("") : `<div class="empty">Nada registrado nesta semana.</div>`;
+  bindEntries(dd);
+}
+$("wPrev").onclick=()=>{ semOff--; renderSemana(); };
+$("wNext").onclick=()=>{ if(semOff<0){ semOff++; renderSemana(); } };
+function gerarRelatorio(){
+  const {dias, keys, lst}=dadosSemana(); const f=d=>d.toLocaleDateString("pt-BR");
+  const tot=lst.reduce((s,r)=>s+minutos(r.inicio,r.fim),0), km=lst.reduce((s,r)=>s+(Number(r.km)||0),0);
+  let t=`*RELATÓRIO SEMANAL — ${f(dias[0])} a ${f(dias[6])}*\nMARIA CLARA GARCIA — Nutribom\n\n`;
+  t+=`Resumo: ${lst.length} atendimento(s), ${fmtH(tot)} registradas, ${new Set(lst.map(r=>r.localId||r.localNome)).size} local(is)${km? ", "+km+" km":""}.\n`;
+  const pt={}; lst.forEach(r=>{ const n=tipoInfo(r.tipo).n; pt[n]=(pt[n]||0)+1; });
+  Object.entries(pt).sort((a,b)=>b[1]-a[1]).forEach(([n,c])=>t+=`• ${n}: ${c}\n`);
+  dias.forEach((d,i)=>{ const rs=lst.filter(r=>r.data===keys[i]); const di=D.diario.filter(x=>x.data===keys[i]); if(!rs.length && !di.length) return;
+    t+=`\n*${d.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"}).toUpperCase()}*\n`;
+    di.forEach(x=>{ t+=`- ${x.texto}\n`; });
+    rs.forEach(r=>{ const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:"")+" ":""; const cid=localCidade(r);
+      t+=`- ${h}${localNome(r)}${cid?" ("+cid+")":""} — ${tipoInfo(r.tipo).n}\n`; if(r.feitos&&r.feitos.length) t+=`  ✓ ${r.feitos.join(", ")}\n`; if(r.descricao) t+=`  ${r.descricao.replace(/\n/g,"\n  ")}\n`; }); });
+  const pw=D.producao.filter(p=>keys.includes(p.data));
+  if(pw.length){ t+=`\n*PRODUÇÃO DE LEITE ANOTADA*\n`; pw.sort((a,b)=>a.data.localeCompare(b.data)).forEach(p=>{ const l=locById(p.localId); t+=`- ${l?l.nome:"?"}: ${fmtL(p.litros)} (${fmtData(p.data)})\n`; }); }
+  const pend=pendAbertas();
+  if(pend.length){ t+=`\n*PENDÊNCIAS EM ABERTO*\n`; pend.forEach(p=>{ const l=locById(p.localId); t+=`- ${l?l.nome+": ":""}${p.texto}\n`; }); }
+  return t;
+}
+$("btnRel").onclick=()=>{ $("relTxt").textContent=gerarRelatorio(); $("btnCopiar").textContent="Copiar texto"; abrir("shRel"); };
+$("btnCopiar").onclick=async()=>{
+  try{ await navigator.clipboard.writeText($("relTxt").textContent); $("btnCopiar").textContent="Copiado ✓"; }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($("relTxt")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Texto selecionado — use Copiar do celular"); }
+};
+
+/* ================= render geral ================= */
+function badges(){
+  const n=D.notas.filter(x=>!x.feito).length, p=pendAbertas().length;
+  $("bAnotar").textContent=n; $("bAnotar").classList.toggle("hidden",!n);
+  $("bFaz").textContent=p; $("bFaz").classList.toggle("hidden",!p);
+  const g=D.agenda.filter(a=>a.data===ymd(new Date()) && !a.feito).length;
+  $("bAg").textContent=g; $("bAg").classList.toggle("hidden",!g);
+  const li=lembretes().length;
+  $("bIni").textContent=li; $("bIni").classList.toggle("hidden", !li || view==="inicio");
+}
+function render(){
+  badges();
+  if(view==="inicio") renderInicio(); else if(view==="mais") renderMais(); else if(view==="agenda") renderAgenda(); else if(view==="anotar") renderAnotar(); else if(view==="diario") renderDiario(); else if(view==="fazendas") renderFazendas(); else renderSemana();
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) render(); });
+(async()=>{
+  render();
+  await store.init();
+  ["locais","registros","notas","pendencias","qualidade","agenda","diario","producao"].forEach(c=>store.listen(c, arr=>{ D[c]=arr; render(); }));
+})();
+</script>
+<script>
+/* mede quanto da moldura ficou abaixo da parte visível da tela */
+(function(){
+  if(!window.claude) return;
+  if(!("IntersectionObserver" in window)) return;
+  var p=document.createElement("div"); p.id="vpProbe"; document.body.appendChild(p);
+  var medido=0;
+  var th=[]; for(var i=0;i<=200;i++) th.push(i/200);
+  new IntersectionObserver(function(es){
+    var e=es[es.length-1]; if(!e.isIntersecting) return;
+    var c=Math.round(e.boundingClientRect.bottom-e.intersectionRect.bottom);
+    medido=(c<0||c>e.boundingClientRect.height/2)?0:c;
+    aplica();
+  },{threshold:th}).observe(p);
+  /* no app do iPhone a janela pode ocupar a tela inteira mesmo com o cabeçalho do Claude por cima */
+  function aplica(){
+    var w=window.innerWidth,h=window.innerHeight,cel=matchMedia("(pointer:coarse)").matches&&w<=600&&h>w;
+    var est=cel?Math.max(0,Math.min(120,h+90-screen.height)):0;
+    var c=Math.max(medido,est);
+    document.documentElement.style.setProperty("--clip",c+"px");
+    document.documentElement.classList.toggle("clipped",c>0);
+    var d=document.getElementById("vpDiag");
+    if(!d){d=document.createElement("p");d.id="vpDiag";d.style.cssText="font-size:11px;color:var(--muted);margin:2px 0 0";var h1=document.getElementById("status");if(h1)h1.insertAdjacentElement("afterend",d);}
+    d.textContent="barra v3 · tela "+screen.height+" · janela "+h+" · sobe "+c;
+  }
+  window.addEventListener("resize",aplica);
+  window.addEventListener("orientationchange",aplica);
+  aplica();
+})();
+</script>
+<script>
+if(!window.claude&&"serviceWorker" in navigator&&location.protocol!=="file:") navigator.serviceWorker.register("sw.js").catch(function(){});
+</script>
+</body>
+</html>
