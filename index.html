@@ -579,6 +579,19 @@ const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
 const comPrazo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),ms))]);
 /* Tudo é gravado primeiro no aparelho (fila dc_fila) e enviado quando há sinal.
    Dentro do Claude o destino é o banco do artifact; fora dele, a planilha do Google. */
+/* A planilha devolve "false"/"true" e listas como texto: converte de volta (senão "false" conta como feito) */
+function normaliza(o){
+  if(!o||typeof o!=="object") return o;
+  const r={};
+  for(const k in o){ let v=o[k];
+    if(typeof v==="string"){ const t=v.trim();
+      if(/^(true|verdadeiro)$/i.test(t)) v=true;
+      else if(/^(false|falso)$/i.test(t)) v=false;
+      else if(t[0]==="["&&t[t.length-1]==="]"){ try{ v=JSON.parse(t); }catch(e){} }
+    }
+    r[k]=v; }
+  return r;
+}
 const store = {
   db:null, mode:"loading", subs:{}, base:{}, q:[], enviando:false, cfg:null, semSinal:false,
   async init(){
@@ -594,14 +607,14 @@ const store = {
     setInterval(tenta,60000);
     setTimeout(tenta,300);
   },
-  _b(c){ if(!(c in this.base)) this.base[c]=lsGet("dcc_"+c, this.mode==="planilha"?lsGet("dc_"+c,[]):[]); return this.base[c]; },
+  _b(c){ if(!(c in this.base)) this.base[c]=(lsGet("dcc_"+c, this.mode==="planilha"?lsGet("dc_"+c,[]):[])||[]).map(normaliza); return this.base[c]; },
   _view(c){
     const m=new Map(this._b(c).map(x=>[x.id,x]));
     this.q.filter(o=>o.c===c).forEach(o=>{ if(o.del) m.delete(o.id); else m.set(o.id,Object.assign({id:o.id},o.o)); });
     return [...m.values()];
   },
   _emit(c){ this.subs[c] && this.subs[c](this._view(c)); },
-  _setBase(c,arr){ this.base[c]=arr; lsSet("dcc_"+c,arr); this._emit(c); },
+  _setBase(c,arr){ arr=(arr||[]).map(normaliza); this.base[c]=arr; lsSet("dcc_"+c,arr); this._emit(c); },
   listen(coll, cb){
     this.subs[coll]=cb; this._emit(coll);
     if(this.mode!=="db") return;
