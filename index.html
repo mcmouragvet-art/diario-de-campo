@@ -160,6 +160,14 @@ textarea{min-height:90px;resize:vertical}
 .addrow .btn{min-width:56px;padding:0 16px;font-size:22px}
 
 /* stats */
+.jor{background:var(--card);border:2px solid var(--brand);border-radius:22px;padding:16px 18px;margin-top:14px;box-shadow:var(--shadow)}
+.jor.on{border-color:var(--warm-ink)}
+.jor .k{font-size:13px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
+.jor.on .k{color:var(--warm-ink)}
+.jor .big1{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15;margin:4px 0 2px}
+.jorline{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:15px}
+.jorline:last-child{border-bottom:0}
+.jorline b{font-variant-numeric:tabular-nums}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px;box-shadow:var(--shadow)}
 .stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -221,6 +229,7 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
     <p class="hello" id="hello">Olá, Maria Clara</p>
     <p class="sub" id="hoje" style="text-transform:none"></p>
     <div class="status" id="status">Conectando…</div>
+    <div id="jorBox"></div>
     <div id="hero"></div>
     <div id="alertas"></div>
 
@@ -362,6 +371,7 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
       <div class="stat"><b id="sH">0h</b><span>horas</span></div>
       <div class="stat"><b id="sL">0</b><span>locais</span></div>
     </div>
+    <h2>⏱ Jornada de trabalho</h2><div class="card pad" id="jorSemana"></div>
     <button class="btn block" id="btnRel" style="margin-top:14px">📋 Gerar relatório da semana</button>
     <h2>Por tipo de serviço</h2><div class="card pad" id="porTipo" style="padding-top:4px;padding-bottom:4px"></div>
     <h2>O que foi feito</h2><div class="card pad" id="porItem" style="padding-top:4px;padding-bottom:4px"></div>
@@ -517,6 +527,22 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
   <div class="grab"></div>
   <div class="row between"><h3>Virar pendência de qual fazenda?</h3><button class="close" data-close>✕</button></div>
   <div class="types" id="pickList" style="margin-top:16px;grid-template-columns:1fr"></div>
+</div></div>
+
+<!-- Jornada -->
+<div class="sheet" id="shJor"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3>⏱ Jornada</h3><button class="close" data-close>✕</button></div>
+  <label>Dia</label><input type="date" id="jData">
+  <div class="grid2">
+    <div><label>Comecei às</label><input type="time" id="jIni"></div>
+    <div><label>Terminei às</label><input type="time" id="jFim"></div>
+  </div>
+  <p class="tiny muted" style="margin:8px 2px 0">Ainda trabalhando? Deixe "Terminei às" em branco.</p>
+  <div class="row" style="margin-top:18px;gap:8px">
+    <button class="btn danger hidden" id="jDel">Excluir</button>
+    <button class="btn block" id="jSalvar">Salvar</button>
+  </div>
 </div></div>
 
 <!-- Relatório -->
@@ -718,6 +744,58 @@ const temLeite = (id, mes) => D.qualidade.some(q=>q.localId===id && q.mes===mes)
 const ultProd = id => D.producao.filter(p=>p.localId===id).sort((a,b)=>b.data.localeCompare(a.data))[0];
 const fmtL = n => fmtNum(n)+" L/dia";
 const faltaLeite = () => { const m=mesAnterior(); return D.locais.filter(l=>ehFazenda(l) && !temLeite(l.id,m)); };
+/* ---- jornada: guardada no diário (id jornada_AAAA-MM-DD), assim sincroniza igual ao resto ---- */
+const JOR_ID = d => "jornada_"+d;
+const ehJor = x => !!x && (x.jornada===true || String(x.id||"").startsWith("jornada_"));
+function jorDe(x){ let i=x.inicio||"", f=x.fim||""; if(!i){ const m=String(x.texto||"").match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})?/); if(m){ i=m[1]; f=m[2]||""; } } return {id:x.id, data:x.data, inicio:i, fim:f}; }
+const jornadas = () => D.diario.filter(ehJor).map(jorDe).filter(j=>j.data&&j.inicio);
+const jorDia = d => jornadas().find(j=>j.data===d);
+const diarioTxt = () => D.diario.filter(x=>!ehJor(x));
+const jorMin = j => !j? 0 : j.fim? minutos(j.inicio,j.fim) : (j.data===ymd(new Date())? minutos(j.inicio,nowHM()) : 0);
+const emLocais = d => D.registros.filter(r=>r.data===d).reduce((s,r)=>s+minutos(r.inicio,r.fim),0);
+async function salvarJor(data, inicio, fim, msg){
+  return salvar("diario", JOR_ID(data), {data, jornada:true, inicio, fim:fim||"", texto:"⏱ Jornada "+inicio+"–"+(fim||""), atualizadoEm:nowISO()}, msg);
+}
+function abrirJor(data, fimSug){
+  const j=jorDia(data);
+  $("jData").value=data; $("jIni").value=j? j.inicio : ""; $("jFim").value= j&&j.fim? j.fim : (fimSug||"");
+  $("jDel").classList.toggle("hidden", !j); $("jDel").textContent="Excluir"; jDelArm=false;
+  abrir("shJor");
+}
+let jDelArm=false, jOcup=false;
+$("jSalvar").onclick=async()=>{
+  const d=$("jData").value, i=$("jIni").value, f=$("jFim").value;
+  if(!d){ toast("Escolha o dia"); return; } if(!i){ toast("Informe a hora em que começou"); return; }
+  if(f && minutos(i,f)<=0){ toast("O término precisa ser depois do início"); return; }
+  $("jSalvar").disabled=true;
+  if(await salvarJor(d, i, f, "⏱ Jornada salva"+(f? " · "+fmtH(minutos(i,f)) : ""))) fechar("shJor");
+  $("jSalvar").disabled=false;
+};
+$("jDel").onclick=async()=>{
+  if(!jDelArm){ jDelArm=true; $("jDel").textContent="Toque de novo"; return; }
+  if(await apagar("diario", JOR_ID($("jData").value), "Jornada apagada")) fechar("shJor");
+};
+function renderJornada(){
+  const hj=ymd(new Date()), j=jorDia(hj), B=$("jorBox");
+  if(!j){
+    B.innerHTML=`<div class="jor"><div class="k">⏱ Jornada de hoje</div>
+      <button class="btn big block" id="jorIni" style="margin-top:10px">▶️ Iniciar jornada</button>
+      <div class="tiny muted" style="text-align:center;margin-top:8px">Toque quando começar a trabalhar · <button class="link tiny" id="jorIniH" style="padding:0;min-height:0">já comecei antes</button></div></div>`;
+    $("jorIni").onclick=async()=>{ if(jOcup) return; jOcup=true; await salvarJor(hj, nowHM(), "", "▶️ Jornada iniciada às "+nowHM()); jOcup=false; };
+    $("jorIniH").onclick=()=>abrirJor(hj);
+  } else if(!j.fim){
+    B.innerHTML=`<div class="jor on"><div class="k">⏱ Trabalhando desde ${esc(j.inicio)}</div>
+      <div class="big1">${fmtH(jorMin(j))}</div><div class="ti2 muted small">até agora</div>
+      <button class="btn big block" id="jorFim" style="margin-top:12px;background:var(--warm);color:var(--warm-ink)">⏹️ Encerrar jornada</button>
+      <button class="link small" id="jorEd" style="width:100%;text-align:center;margin-top:6px">corrigir horário</button></div>`;
+    $("jorFim").onclick=async()=>{ if(jOcup) return; jOcup=true; const f=nowHM(); await salvarJor(hj, j.inicio, f, "⏹️ Jornada encerrada · "+fmtH(minutos(j.inicio,f))); jOcup=false; };
+    $("jorEd").onclick=()=>abrirJor(hj);
+  } else {
+    B.innerHTML=`<button class="alert" id="jorEd" style="margin-top:14px;background:var(--soft);color:var(--brand)"><span class="grow">✓ Jornada de hoje<br><span class="small" style="font-weight:400">${esc(j.inicio)} às ${esc(j.fim)} · toque para corrigir</span></span><b style="font-size:20px;white-space:nowrap">${fmtH(jorMin(j))}</b></button>`;
+    $("jorEd").onclick=()=>abrirJor(hj);
+  }
+}
+
 function locaisOrdenados(){
   const cnt={}; D.registros.forEach(r=>cnt[r.localId]=(cnt[r.localId]||0)+1);
   return D.locais.slice().sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0) || a.nome.localeCompare(b.nome,"pt-BR"));
@@ -726,6 +804,12 @@ function locaisOrdenados(){
 /* ================= lembretes dentro do app ================= */
 function lembretes(){
   const out=[]; const agora=new Date(); const h=agora.getHours(); const hj=ymd(agora);
+  // 0) jornada
+  { const jh=jorDia(hj);
+    if(!jh && D.registros.some(r=>r.data===hj)) out.push({ico:"⏱", txt:"Esqueceu de iniciar a jornada? Toque e diga a hora que começou", act:()=>abrirJor(hj)});
+    if(jh && !jh.fim && h>=19) out.push({ico:"⏹️", txt:`Jornada aberta desde ${jh.inicio}. Já terminou? Toque para encerrar`, act:()=>abrirJor(hj, nowHM())});
+    const l7=new Date(); l7.setDate(l7.getDate()-7); const l7k=ymd(l7);
+    jornadas().filter(j=>j.data<hj && j.data>=l7k && !j.fim).forEach(j=>out.push({ico:"⏱", txt:`Jornada de ${fmtData(j.data)} sem hora de término — toque para corrigir`, act:()=>abrirJor(j.data)})); }
   // 1) atendimentos de hoje sem saída ou sem descrição
   D.registros.filter(r=>r.data===hj && r.inicio && r.tipo!=="entrega").forEach(r=>{
     if(!r.fim) out.push({ico:"🚗", txt:`Saiu de ${localNome(r)}? Toque para registrar a saída`, act:()=>sair(r)});
@@ -737,7 +821,7 @@ function lembretes(){
   if(atras.length) out.push({ico:"✍️", txt:`${atras.length} visita${atras.length>1?"s":""} dos últimos dias sem descrição`, act:()=>{ diaOff=0; $("dSearch").value=""; irPara("diario"); }});
   // 3) fim do dia sem nada no diário
   const dow=agora.getDay();
-  const nadaHoje = !D.diario.some(x=>x.data===hj) && !D.registros.some(r=>r.data===hj);
+  const nadaHoje = !diarioTxt().some(x=>x.data===hj) && !D.registros.some(r=>r.data===hj);
   if(h>=15 && dow>=1 && dow<=6 && nadaHoje) out.push({ico:"📖", txt:"Como foi o dia? Conte no diário o que você fez", act:()=>{ irPara("diario"); abrirDia(null); }});
   // 4) CCS/CBT do mês passado
   const fl=faltaLeite();
@@ -764,6 +848,8 @@ function renderInicio(){
   if($("maisAvisos")) $("maisAvisos").onclick=()=>{ showAllAlerts=true; renderInicio(); };
   $("alertas").querySelectorAll("[data-lb]").forEach(b=>b.onclick=()=>L[+b.dataset.lb].act());
   $("alertas").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ fazAtual=null; irPara(b.dataset.go); });
+
+  renderJornada();
 
   // herói: o que fazer agora
   const hojeK=ymd(new Date());
@@ -1438,7 +1524,8 @@ function semanaOffDe(s){ const a=inicioSemana(0), d=parseYmd(s); const dow=(d.ge
 const hmISO = iso => { const d=new Date(iso); return pad(d.getHours())+":"+pad(d.getMinutes()); };
 function itensDiario(){
   const it=[];
-  D.diario.forEach(x=>it.push({k:"dia", id:x.id, data:x.data, hora:"", ico:"📖", titulo:x.texto, sub:""}));
+  diarioTxt().forEach(x=>it.push({k:"dia", id:x.id, data:x.data, hora:"", ico:"📖", titulo:x.texto, sub:""}));
+  jornadas().forEach(j=>it.push({k:"jor", id:j.id, data:j.data, hora:j.inicio, ico:"⏱", titulo:"Jornada "+j.inicio+"–"+(j.fim||"…")+(jorMin(j)? " · "+fmtH(jorMin(j)) : ""), sub: j.fim? "" : "sem hora de término — toque para corrigir"}));
   D.registros.forEach(r=>{ const t=tipoInfo(r.tipo); const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:""):""; const c=localCidade(r);
     it.push({k:"reg", id:r.id, data:r.data, hora:r.inicio||"", ico:"📍", titulo:localNome(r)+" — "+t.n, sub:[[h,c].filter(Boolean).join(" · "), r.descricao || "✍️ toque para contar o que fez"].filter(Boolean).join("\n")}); });
   D.agenda.filter(a=>a.feito).forEach(a=>{ const l=a.localId? locById(a.localId):null; it.push({k:"ag", id:a.id, data:a.data, hora:a.hora||"", ico:"📅", titulo:a.titulo, sub:"Compromisso cumprido"+(l?" · "+l.nome:"")}); });
@@ -1475,7 +1562,7 @@ function renderDiario(){
   $("dLista").innerHTML = dias.map(d=>{
     const rs=it.filter(x=>x.data===d).sort((x,y)=>(x.hora||"").localeCompare(y.hora||""));
     return `<h2 style="text-transform:none;letter-spacing:0;font-size:16px;color:var(--brand)">${esc(diaRotulo(d))}</h2><div class="card">`+
-      rs.map(x=>`<div class="ditem ${["dia","reg","ag"].includes(x.k)?"click":""}" data-k="${x.k}" data-id="${esc(x.id)}"><div class="ico">${x.ico}</div>
+      rs.map(x=>`<div class="ditem ${["dia","reg","ag","jor"].includes(x.k)?"click":""}" data-k="${x.k}" data-id="${esc(x.id)}"><div class="ico">${x.ico}</div>
         <div class="grow"><div class="row between" style="align-items:flex-start"><span class="tt">${marca(x.titulo,q)}</span>${x.hora?`<span class="muted small" style="white-space:nowrap">${esc(x.hora)}</span>`:""}</div>
         ${x.sub?`<div class="ss">${marca(x.sub,q)}</div>`:""}</div></div>`).join("")+`</div>`;
   }).join("");
@@ -1484,6 +1571,7 @@ function renderDiario(){
     if(k==="dia") abrirDia(D.diario.find(x=>x.id===id));
     else if(k==="reg") abrirRegistro(D.registros.find(x=>x.id===id));
     else if(k==="ag") abrirAg(D.agenda.find(x=>x.id===id));
+    else if(k==="jor"){ const j=jornadas().find(x=>x.id===id); if(j) abrirJor(j.data); }
   });
 }
 let dsT; $("dSearch").addEventListener("input",()=>{ clearTimeout(dsT); dsT=setTimeout(renderDiario,150); });
@@ -1747,6 +1835,23 @@ function renderSemana(){
   dd.innerHTML = lst.length? dias.map((d,i)=>{ const rs=lst.filter(r=>r.data===keys[i]); if(!rs.length) return "";
     return `<div class="daytitle">${d.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric"})}</div>`+rs.map(r=>entryHTML(r)).join(""); }).join("") : `<div class="empty">Nada registrado nesta semana.</div>`;
   bindEntries(dd);
+  renderJorSemana(dias, keys);
+}
+function jorMes(ref){
+  const mk=ymd(ref).slice(0,7); const js=jornadas().filter(j=>j.data.slice(0,7)===mk);
+  return {nome:MESES_L[ref.getMonth()], min:js.reduce((s,j)=>s+jorMin(j),0), dias:js.length};
+}
+function renderJorSemana(dias, keys){
+  const js=keys.map(k=>jorDia(k)); const tot=js.reduce((s,j)=>s+jorMin(j),0); const nd=js.filter(Boolean).length;
+  const loc=keys.reduce((s,k,i)=>s+(js[i]? emLocais(k):0),0);
+  const m=jorMes(dias[3]);
+  if(!nd){ $("jorSemana").innerHTML=`<div class="empty">Nenhuma jornada registrada nesta semana.<br>Use o botão <b>▶️ Iniciar jornada</b> no Início.</div><div class="jorline"><span class="grow">Mês de ${esc(m.nome)}</span><b>${fmtH(m.min)}</b></div>`; return; }
+  const fora=Math.max(0, tot-loc);
+  $("jorSemana").innerHTML=`<div class="jorline" style="padding-top:14px"><span class="grow"><b style="font-size:24px">${fmtH(tot)}</b><br><span class="small muted">na semana · ${nd} dia${nd>1?"s":""}</span></span>
+      <span class="small muted" style="text-align:right">🏡 em locais ${fmtH(Math.min(loc,tot))}<br>🚗 deslocamento e outros ${fmtH(fora)}</span></div>`+
+    dias.map((d,i)=>{ const j=js[i]; if(!j) return ""; return `<div class="jorline" data-jd="${keys[i]}" style="cursor:pointer"><span class="grow" style="text-transform:capitalize">${d.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit"})}</span><span class="muted small">${esc(j.inicio)}–${esc(j.fim||"…")}</span><b style="min-width:58px;text-align:right">${j.fim||j.data===ymd(new Date())? fmtH(jorMin(j)) : "?"}</b></div>`; }).join("")+
+    `<div class="jorline"><span class="grow">Mês de ${esc(m.nome)} <span class="small muted">· ${m.dias} dia${m.dias!==1?"s":""}</span></span><b>${fmtH(m.min)}</b></div>`;
+  $("jorSemana").querySelectorAll("[data-jd]").forEach(el=>el.onclick=()=>abrirJor(el.dataset.jd));
 }
 $("wPrev").onclick=()=>{ semOff--; renderSemana(); };
 $("wNext").onclick=()=>{ if(semOff<0){ semOff++; renderSemana(); } };
@@ -1754,11 +1859,13 @@ function gerarRelatorio(){
   const {dias, keys, lst}=dadosSemana(); const f=d=>d.toLocaleDateString("pt-BR");
   const tot=lst.reduce((s,r)=>s+minutos(r.inicio,r.fim),0), km=lst.reduce((s,r)=>s+(Number(r.km)||0),0);
   let t=`*RELATÓRIO SEMANAL — ${f(dias[0])} a ${f(dias[6])}*\nMARIA CLARA GARCIA — Nutribom\n\n`;
+  { const js=keys.map(k=>jorDia(k)).filter(Boolean); if(js.length){ const jt=js.reduce((s,j)=>s+jorMin(j),0); t+=`Jornada de trabalho: ${fmtH(jt)} em ${js.length} dia(s).\n`; } }
   t+=`Resumo: ${lst.length} atendimento(s), ${fmtH(tot)} registradas, ${new Set(lst.map(r=>r.localId||r.localNome)).size} local(is)${km? ", "+km+" km":""}.\n`;
   const pt={}; lst.forEach(r=>{ const n=tipoInfo(r.tipo).n; pt[n]=(pt[n]||0)+1; });
   Object.entries(pt).sort((a,b)=>b[1]-a[1]).forEach(([n,c])=>t+=`• ${n}: ${c}\n`);
-  dias.forEach((d,i)=>{ const rs=lst.filter(r=>r.data===keys[i]); const di=D.diario.filter(x=>x.data===keys[i]); if(!rs.length && !di.length) return;
+  dias.forEach((d,i)=>{ const rs=lst.filter(r=>r.data===keys[i]); const di=diarioTxt().filter(x=>x.data===keys[i]); const jd=jorDia(keys[i]); if(!rs.length && !di.length && !jd) return;
     t+=`\n*${d.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"}).toUpperCase()}*\n`;
+    if(jd) t+=`⏱ Jornada: ${jd.inicio}–${jd.fim||"sem término"}${jd.fim? " ("+fmtH(jorMin(jd))+")" : ""}\n`;
     di.forEach(x=>{ t+=`- ${x.texto}\n`; });
     rs.forEach(r=>{ const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:"")+" ":""; const cid=localCidade(r);
       t+=`- ${h}${localNome(r)}${cid?" ("+cid+")":""} — ${tipoInfo(r.tipo).n}\n`; if(r.feitos&&r.feitos.length) t+=`  ✓ ${r.feitos.join(", ")}\n`; if(r.descricao) t+=`  ${r.descricao.replace(/\n/g,"\n  ")}\n`; }); });
