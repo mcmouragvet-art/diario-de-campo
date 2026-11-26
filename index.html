@@ -940,33 +940,55 @@ function renderPendIni(){
 /* ================= REGISTRAR (frase livre / voz) ================= */
 const NUMS={um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,doze:12,quinze:15,vinte:20};
 const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const GENERICOS=["santa","santo","sao","nova","novo","boa","bom","agua","fazenda","sitio","granja","retiro","estancia","recanto","escritorio","loja","cooperativa"];
 function achaLocais(t){
   const s=norm(t); const achados=[];
   D.locais.forEach(l=>{
     const nomes=[norm(l.nome).replace(/^(fazenda|faz\.?|sitio|escritorio)\s+(d[aoe]s?\s+)?/,"").replace(/\(.*?\)/g,"").trim()];
     const pm=String(l.nome).match(/\(([^)]+)\)/); if(pm) nomes.push(norm(pm[1]).trim());
     const dn=norm(dono(l)).split(" ")[0]; if(dn && dn.length>2) nomes.push(dn);
+    const p1=nomes[0].split(/[\s\/]+/)[0]; if(p1 && p1.length>=4 && !GENERICOS.includes(p1)) nomes.push(p1);
     let pos=-1; nomes.forEach(n=>{ if(!n||n.length<3) return; const m=s.search(new RegExp("\\b"+reEsc(n)+"\\b")); if(m>=0 && (pos<0||m<pos)) pos=m; });
     if(pos>=0) achados.push({id:l.id,pos});
   });
   achados.sort((a,b)=>a.pos-b.pos);
   return [...new Set(achados.map(a=>a.id))];
 }
+const QTD_RE="(\\d+(?:[.,]\\d+)?|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|doze|quinze|vinte)";
+const UN_RE="(galoes|galao|gls?|gal|bombonas?|caixas?|sacos?|unidades?|un|frascos?|baldes?|potes?|pacotes?|litros?|lts?|kg|tambor(?:es)?|bisnagas?|vidros?)";
+const NAO_ITEM="(?:l|lt|lts|litros?|kg|ml|mil|por|dia|dias|horas?|h|hs|vacas?|animais|anos?|meses|semanas?|minutos|min|km|cel|ufc|reais|vezes|x)";
 function itensEntrega(t){
   const s=norm(t); const out=[];
-  const re=/(\d+(?:[.,]\d+)?|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|doze|quinze|vinte)\s*(galoes|galao|gls?|gal|bombonas?|litros?|lts?|caixas?|sacos?|unidades?|un|kg|frascos?|baldes?|potes?|pacotes?)\b\.?\s*(?:de\s+|do\s+|da\s+)?([a-z0-9][a-z0-9 +\-]*?)(?=\s*(?:,|;|\.|\s+e\s+(?:\d|um|uma|dois|duas|tres)|\s+(?:pra|para|no|na|hoje|ontem|amanha|que|porque)\b|$))/g;
-  let m; while((m=re.exec(s))){
-    const q = NUMS[m[1]]!=null? NUMS[m[1]] : Number(m[1].replace(",","."));
-    const ini=m.index+m[0].length-m[3].length; let prod=t.substr(ini,m[3].length).trim();
-    if(!prod || prod.length>40) continue;
-    if(/^(por dia|dia|ao dia|de leite|leite|\/dia)/i.test(norm(prod)) || /(tirando|produzindo|producao|produz|ordenhando)\s*$/.test(s.slice(0,m.index).trim().split(" ").slice(-1)[0]||"")) continue;
-    prod=prod.charAt(0).toUpperCase()+prod.slice(1);
-    let un=m[2]; if(/^gal|^gl/.test(un)) un= q===1?"galão":"galões"; else if(/^l/.test(un)) un="L";
-    out.push({qtd:q, un, produto:prod});
+  const re=new RegExp("(^|[\\s,;:.\\n])"+QTD_RE+"\\s*(?:"+UN_RE+"\\b\\.?\\s*)?(?!"+NAO_ITEM+"\\b)(?=[a-z0-9])","g");
+  const ini=[]; let m;
+  while((m=re.exec(s))){
+    const qi=m.index+m[1].length;
+    if(/\bde\s*$/.test(s.slice(0,qi))) continue;           // "galão de 200 ..." = tamanho, não item
+    if(!m[3] && /^\d/.test(s.slice(m.index+m[0].length))) continue;
+    if(/(tirando|produzindo|producao|produz|ordenhando|ccs|cpp|cbt)\s*$/.test(s.slice(0,qi))) continue;
+    ini.push({qi, fim:m.index+m[0].length, q:m[2], un:m[3]||""});
   }
+  ini.forEach((x,i)=>{
+    const lim = i+1<ini.length? ini[i+1].qi : s.length;
+    let a=x.fim, b=lim;
+    const seg=()=>s.slice(a,b);
+    let tam="";
+    const corta=seg().search(/\s(?:hoje|ontem|amanha|pra|para|porque|ficou|preciso|falta)\b|\n/); if(corta>=0) b=a+corta;
+    { const r=seg().match(/[\s,;.]*(?:\be\b)?[\s,;.]*$/); if(r) b-=r[0].length; }
+    if(x.un){ const r=seg().match(/^(?:de\s+)?(\d+(?:[.,]\d+)?)\s*(l|lt|lts|litros?|kg|ml)?\b\s*(?:de\s+)?/); if(r && (r[2]||/^de\s/.test(r[0])||/^\d+\s*$/.test(r[0].trim())===false||true)){ tam=r[1]+" "+(r[2]? (/^l/.test(r[2])?"L":r[2]) : "L"); a+=r[0].length; } }
+    { const r=seg().match(/^(?:de|do|da|dos|das)\s+/); if(r) a+=r[0].length; }
+    if(x.un){ const r=seg().match(/\s+(?:de\s+)?(\d+(?:[.,]\d+)?)\s*(l|lt|lts|litros?|kg|ml)\b\.?$/); if(r){ if(!tam) tam=r[1]+" "+(/^l/.test(r[2])?"L":r[2]); b-=r[0].length; } }
+    let prod=t.slice(a,b).replace(/\s+/g," ").trim();
+    if(!prod || prod.length>45) return;
+    if(/^(por dia|dia|ao dia|de leite|leite)/i.test(norm(prod))) return;
+    prod=prod.charAt(0).toUpperCase()+prod.slice(1);
+    const q = NUMS[x.q]!=null? NUMS[x.q] : Number(x.q.replace(",","."));
+    let un=x.un; if(/^gal|^gl/.test(un)) un= q===1?"galão":"galões"; else if(/^(l|lt|litro)/.test(un)) un="L";
+    out.push({qtd:q, un, tam, produto:prod});
+  });
   return out;
 }
-const txtItens = its => its.map(i=>`${fmtNum(i.qtd)} ${i.un} de ${i.produto}`).join(", ");
+const txtItens = its => its.map(i=>`${fmtNum(i.qtd)} ${i.un? i.un+" ":""}${i.tam? "de "+i.tam+" ":""}${(i.un||i.tam)? "de ":""}${i.produto}`).join(", ");
 function achaPend(t){
   const out=[]; const re=/(?:fic(?:ou|aram|amos) de|preciso|precisa|precisamos|tenho que|temos que|esperando|aguardando|faltou|falta|pendente|na pr[oó]xima)\s+[^.;\n]+/gi;
   let m; while((m=re.exec(t))){ const x=m[0].trim(); if(x.length>6) out.push(x.charAt(0).toUpperCase()+x.slice(1)); }
@@ -1006,7 +1028,8 @@ async function registrarLivre(t){
   const g=await Promise.race([gpsP||Promise.resolve(null), new Promise(r=>setTimeout(()=>r(gpsUlt),1500))]);
   const perto=locPerto(g); if(!l && perto && data===hj) l=perto;
   const its=itensEntrega(t); const msgs=[];
-  if(its.length && l){
+  const ehEnt = its.length && (regModo==="entrega" || /entreg/.test(norm(t)) || its.some(i=>i.un));
+  if(ehEnt && l){
     await salvar("registros", uid(), {data, inicio:hora, fim:hora, localId:l.id, localNome:l.nome, localCidade:l.cidade||"", tipo:"entrega", feitos:["Entrega de produtos"], itens:its, descricao:txtItens(its), km:null, criadoEm:nowISO(), atualizadoEm:nowISO()});
     msgs.push("🚚 Entrega em "+l.nome);
   } else {
@@ -1015,7 +1038,7 @@ async function registrarLivre(t){
     if(g && data===hj){ o.lat=+g.lat.toFixed(5); o.lng=+g.lng.toFixed(5); }
     await salvar("diario", uid(), o);
     msgs.push("📖 No diário"+(l? " · "+l.nome:""));
-    if(its.length) msgs.push("não reconheci o cliente da entrega");
+    if(ehEnt) msgs.push("não reconheci o cliente da entrega — cadastre ou fale o nome como está no app");
   }
   if(l && ehFazenda(l)){ const z=organizarLocal(t); const mL=[];
     if(z.litros!=null && z.litros>=50){ await salvar("producao", l.id+"_"+data, {localId:l.id, data, litros:z.litros, atualizadoEm:nowISO()}); mL.push("🐄 "+fmtL(z.litros)); }
