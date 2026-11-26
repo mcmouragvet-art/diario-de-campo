@@ -8,14 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f1ea; --card:#ffffff; --ink:#1d2721; --ink2:#47524b; --muted:#78827c; --line:#e6e1d6;
-  --brand:#2e6a4e; --brand-ink:#ffffff; --soft:#e2eee6; --warm:#fbefdc; --warm-ink:#94591a;
+  --bg:#f3f5f9; --card:#ffffff; --ink:#1d2721; --ink2:#47524b; --muted:#78827c; --line:#dfe4ec;
+  --brand:#103f8c; --brand-ink:#ffffff; --soft:#e4ebf7; --warm:#fbe6e1; --warm-ink:#a33a26;
   --danger:#b3412f; --shadow:0 1px 2px rgba(30,40,30,.06),0 4px 14px rgba(30,40,30,.06);
   --t1:#2e6a4e; --t2:#b3412f; --t3:#2f6fa8; --t4:#1f8a8a; --t5:#7b52a8; --t6:#b97716; --t7:#6c7d2a; --t8:#7a7a7a;
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#121714; --card:#1b221e; --ink:#eaefeb; --ink2:#c3ccc6; --muted:#8f9a94; --line:#2b342f;
-  --brand:#74c49b; --brand-ink:#0f2219; --soft:#22342a; --warm:#3a2d1b; --warm-ink:#f0bb72; --danger:#ec8573; --shadow:none;
+  :root{ --bg:#10141c; --card:#19202b; --ink:#eaefeb; --ink2:#c3ccc6; --muted:#8f9a94; --line:#2b342f;
+  --brand:#8db6f2; --brand-ink:#0d1a33; --soft:#1d2b44; --warm:#3d221d; --warm-ink:#f2a08e; --danger:#ec8573; --shadow:none;
   --t1:#74c49b; --t2:#ec8573; --t3:#76aee0; --t4:#6cc9c9; --t5:#bb95e0; --t6:#e7b061; --t7:#b6c66a; --t8:#a3a3a3;}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -230,6 +230,8 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
     <p class="sub" id="hoje" style="text-transform:none"></p>
     <div class="status" id="status">Conectando…</div>
     <div id="jorBox"></div>
+    <button class="btn big block" id="btnReg" style="margin-top:12px">🎙️ Registrar</button>
+    <div class="tiny muted" style="text-align:center;margin-top:6px">Fale o que fez: “Dinho, levei peça pro Anderson” · “Augusto, 2 galões de Barrier”</div>
     <div id="hero"></div>
     <div id="alertas"></div>
 
@@ -242,6 +244,16 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
 
     <h2>Hoje</h2>
     <div class="card" id="listaHoje"></div>
+
+    <div id="pendIniBox" class="hidden"><h2 id="pendIniTit">Pendências</h2><div class="card" id="pendIni"></div></div>
+  </section>
+
+  <!-- ============ ENTREGAS ============ -->
+  <section id="v-entregas" class="hidden">
+    <p class="hello">Entregas</p>
+    <p class="sub" style="text-transform:none">O app aprende o intervalo de cada cliente e prevê a próxima. Pedido antecipado? É só registrar.</p>
+    <button class="btn big block" id="entReg" style="margin-top:16px">🎙️ Registrar entrega</button>
+    <div id="entConteudo"></div>
   </section>
 
   <!-- ============ AGENDA ============ -->
@@ -529,6 +541,16 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
   <div class="types" id="pickList" style="margin-top:16px;grid-template-columns:1fr"></div>
 </div></div>
 
+<!-- Registrar -->
+<div class="sheet" id="shLivre"><div class="panel">
+  <div class="grab"></div>
+  <div class="row between"><h3 id="regTit">🎙️ Registrar</h3><button class="close" data-close>✕</button></div>
+  <p class="muted small" style="margin:6px 2px 0" id="regDica">Toque no microfone do teclado e fale do seu jeito.</p>
+  <textarea id="regTxt" style="min-height:110px;margin-top:10px" placeholder="Ex.: Fazenda do Dinho, levei peça pro Anderson e puxei os dados dos MPCs. Ficou de mandar a data da revisão."></textarea>
+  <div class="tiny muted" id="regGps" style="margin-top:6px"></div>
+  <button class="btn block big" id="regSalvar" style="margin-top:12px">Guardar</button>
+</div></div>
+
 <!-- Jornada -->
 <div class="sheet" id="shJor"><div class="panel">
   <div class="grab"></div>
@@ -552,6 +574,7 @@ html.clipped nav{padding-bottom:max(env(safe-area-inset-bottom),18px)}
   <p class="small muted">Copie e cole no WhatsApp ou e-mail.</p>
   <pre class="report" id="relTxt"></pre>
   <button class="btn block" id="btnCopiar" style="margin-top:12px">Copiar texto</button>
+  <button class="btn soft block hidden" id="btnShare" style="margin-top:8px">Enviar (WhatsApp, e-mail…)</button>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -721,8 +744,8 @@ const strip = o => { const c=Object.assign({},o); delete c.id; return c; };
 let view="inicio", fazAtual=null, fazTab="pend";
 function irPara(v){
   view=v;
-  { const nk=["diario","fazendas","semana"].includes(v)?"mais":v; document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on", x.dataset.v===nk)); }
-  ["inicio","agenda","anotar","mais","diario","fazendas","semana"].forEach(k=>$("v-"+k).classList.toggle("hidden", k!==v));
+  { const nk=["diario","fazendas","semana","entregas"].includes(v)?"mais":v; document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on", x.dataset.v===nk)); }
+  ["inicio","agenda","anotar","mais","diario","fazendas","semana","entregas"].forEach(k=>$("v-"+k).classList.toggle("hidden", k!==v));
   if(v==="fazendas" && !fazAtual) mostrarLista();
   $("scroller").scrollTo(0,0); render();
 }
@@ -779,14 +802,14 @@ function renderJornada(){
   const hj=ymd(new Date()), j=jorDia(hj), B=$("jorBox");
   if(!j){
     B.innerHTML=`<div class="jor"><div class="k">⏱ Jornada de hoje</div>
-      <button class="btn big block" id="jorIni" style="margin-top:10px">▶️ Iniciar jornada</button>
+      <button class="btn big block" id="jorIni" style="margin-top:10px">▶️ Comecei o dia</button>
       <div class="tiny muted" style="text-align:center;margin-top:8px">Toque quando começar a trabalhar · <button class="link tiny" id="jorIniH" style="padding:0;min-height:0">já comecei antes</button></div></div>`;
     $("jorIni").onclick=async()=>{ if(jOcup) return; jOcup=true; await salvarJor(hj, nowHM(), "", "▶️ Jornada iniciada às "+nowHM()); jOcup=false; };
     $("jorIniH").onclick=()=>abrirJor(hj);
   } else if(!j.fim){
     B.innerHTML=`<div class="jor on"><div class="k">⏱ Trabalhando desde ${esc(j.inicio)}</div>
       <div class="big1">${fmtH(jorMin(j))}</div><div class="ti2 muted small">até agora</div>
-      <button class="btn big block" id="jorFim" style="margin-top:12px;background:var(--warm);color:var(--warm-ink)">⏹️ Encerrar jornada</button>
+      <button class="btn big block" id="jorFim" style="margin-top:12px;background:var(--warm);color:var(--warm-ink)">⏹️ Terminei o dia</button>
       <button class="link small" id="jorEd" style="width:100%;text-align:center;margin-top:6px">corrigir horário</button></div>`;
     $("jorFim").onclick=async()=>{ if(jOcup) return; jOcup=true; const f=nowHM(); await salvarJor(hj, j.inicio, f, "⏹️ Jornada encerrada · "+fmtH(minutos(j.inicio,f))); jOcup=false; };
     $("jorEd").onclick=()=>abrirJor(hj);
@@ -840,8 +863,8 @@ function renderInicio(){
   const L=lembretes();
   const nNotas=D.notas.filter(n=>!n.feito).length, nPend=pendAbertas().length;
   let al=L.map((x,i)=>`<button class="alert" data-lb="${i}">${x.ico} ${esc(x.txt)} <span style="margin-left:auto">›</span></button>`).join("");
-  if(nNotas) al+=`<button class="alert" data-go="anotar" style="background:var(--soft);color:var(--brand)">📝 ${nNotas} anotaç${nNotas>1?"ões":"ão"} para resolver <span style="margin-left:auto">›</span></button>`;
-  if(nPend) al+=`<button class="alert" data-go="fazendas" style="background:var(--soft);color:var(--brand)">📌 ${nPend} pendência${nPend>1?"s":""} nas fazendas <span style="margin-left:auto">›</span></button>`;
+  { const ne=entregasSemana().length; if(ne) al+=`<button class="alert" data-go="entregas" style="background:var(--soft);color:var(--brand)">🚚 ${ne} entrega${ne>1?"s":""} prevista${ne>1?"s":""} esta semana <span style="margin-left:auto">›</span></button>`; }
+  if(new Date().getDay()===5 && h>=14) al+=`<button class="alert" data-go="semana" style="background:var(--soft);color:var(--brand)">📊 Resumo da semana pronto — ver e enviar <span style="margin-left:auto">›</span></button>`;
   { const tmp=document.createElement("div"); tmp.innerHTML=al; const bs=[...tmp.children];
     if(bs.length>1 && !showAllAlerts){ bs.slice(1).forEach(x=>x.classList.add("hidden")); tmp.insertAdjacentHTML("beforeend",`<button class="link" id="maisAvisos" style="margin:6px 2px 0">+ ${bs.length-1} aviso${bs.length>2?"s":""}</button>`); }
     $("alertas").innerHTML=tmp.innerHTML; }
@@ -896,7 +919,173 @@ function renderInicio(){
   const el=$("listaHoje");
   el.innerHTML = lst.length? lst.map(r=>entryHTML(r,true)).join("") : `<div class="empty">Nada registrado hoje ainda.<br>Toque na fazenda onde você está 👆</div>`;
   bindEntries(el);
+  renderPendIni();
 }
+function renderPendIni(){
+  const ns=D.notas.filter(n=>!n.feito).map(n=>({c:"notas", o:n, txt:n.texto, sub:quando(n.criadoEm)}));
+  const ps=pendAbertas().map(p=>{ const l=locById(p.localId); return {c:"pendencias", o:p, txt:p.texto, sub:l? l.nome : ""}; });
+  const all=[...ps,...ns].sort((a,b)=>(b.o.criadoEm||"").localeCompare(a.o.criadoEm||""));
+  $("pendIniBox").classList.toggle("hidden", !all.length);
+  $("pendIniTit").textContent = "Pendências ("+all.length+")";
+  const vis=all.slice(0,8);
+  $("pendIni").innerHTML = vis.map((x,i)=>`<div class="check" data-pi="${i}"><button class="cb" data-ok aria-label="Concluir">${CHECK}</button>
+      <div class="grow"><div class="txt">${esc(x.txt)}</div>${x.sub?`<div class="meta">${esc(x.sub)}</div>`:""}</div></div>`).join("")
+    + (all.length>vis.length? `<button class="link" id="pendIniMais" style="margin:8px 0">Ver todas (${all.length})</button>`:"");
+  $("pendIni").querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>{ const x=vis[+b.closest("[data-pi]").dataset.pi]; b.classList.add("on");
+    if(x.c==="notas") salvar("notas", x.o.id, Object.assign(strip(x.o),{feito:true,feitoEm:nowISO()}), "✓ Feito!");
+    else salvar("pendencias", x.o.id, Object.assign(strip(x.o),{feita:true,feitaEm:nowISO()}), "✓ Resolvida!"); });
+  if($("pendIniMais")) $("pendIniMais").onclick=()=>irPara("anotar");
+}
+
+/* ================= REGISTRAR (frase livre / voz) ================= */
+const NUMS={um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,doze:12,quinze:15,vinte:20};
+const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function achaLocais(t){
+  const s=norm(t); const achados=[];
+  D.locais.forEach(l=>{
+    const nomes=[norm(l.nome).replace(/^(fazenda|faz\.?|sitio|escritorio)\s+(d[aoe]s?\s+)?/,"").replace(/\(.*?\)/g,"").trim()];
+    const pm=String(l.nome).match(/\(([^)]+)\)/); if(pm) nomes.push(norm(pm[1]).trim());
+    const dn=norm(dono(l)).split(" ")[0]; if(dn && dn.length>2) nomes.push(dn);
+    let pos=-1; nomes.forEach(n=>{ if(!n||n.length<3) return; const m=s.search(new RegExp("\\b"+reEsc(n)+"\\b")); if(m>=0 && (pos<0||m<pos)) pos=m; });
+    if(pos>=0) achados.push({id:l.id,pos});
+  });
+  achados.sort((a,b)=>a.pos-b.pos);
+  return [...new Set(achados.map(a=>a.id))];
+}
+function itensEntrega(t){
+  const s=norm(t); const out=[];
+  const re=/(\d+(?:[.,]\d+)?|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|doze|quinze|vinte)\s*(galoes|galao|gls?|gal|bombonas?|litros?|lts?|caixas?|sacos?|unidades?|un|kg|frascos?|baldes?|potes?|pacotes?)\b\.?\s*(?:de\s+|do\s+|da\s+)?([a-z0-9][a-z0-9 +\-]*?)(?=\s*(?:,|;|\.|\s+e\s+(?:\d|um|uma|dois|duas|tres)|\s+(?:pra|para|no|na|hoje|ontem|amanha|que|porque)\b|$))/g;
+  let m; while((m=re.exec(s))){
+    const q = NUMS[m[1]]!=null? NUMS[m[1]] : Number(m[1].replace(",","."));
+    const ini=m.index+m[0].length-m[3].length; let prod=t.substr(ini,m[3].length).trim();
+    if(!prod || prod.length>40) continue;
+    if(/^(por dia|dia|ao dia|de leite|leite|\/dia)/i.test(norm(prod)) || /(tirando|produzindo|producao|produz|ordenhando)\s*$/.test(s.slice(0,m.index).trim().split(" ").slice(-1)[0]||"")) continue;
+    prod=prod.charAt(0).toUpperCase()+prod.slice(1);
+    let un=m[2]; if(/^gal|^gl/.test(un)) un= q===1?"galão":"galões"; else if(/^l/.test(un)) un="L";
+    out.push({qtd:q, un, produto:prod});
+  }
+  return out;
+}
+const txtItens = its => its.map(i=>`${fmtNum(i.qtd)} ${i.un} de ${i.produto}`).join(", ");
+function achaPend(t){
+  const out=[]; const re=/(?:fic(?:ou|aram|amos) de|preciso|precisa|precisamos|tenho que|temos que|esperando|aguardando|faltou|falta|pendente|na pr[oó]xima)\s+[^.;\n]+/gi;
+  let m; while((m=re.exec(t))){ const x=m[0].trim(); if(x.length>6) out.push(x.charAt(0).toUpperCase()+x.slice(1)); }
+  return out.slice(0,5);
+}
+let gpsP=null, gpsUlt=null;
+function pegaGPS(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res(null);
+    let feito=false; const fim=v=>{ if(!feito){ feito=true; if(v) gpsUlt=v; res(v); } };
+    try{ navigator.geolocation.getCurrentPosition(p=>fim({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)}), ()=>fim(null), {timeout:8000,maximumAge:180000,enableHighAccuracy:true}); }catch(e){ fim(null); }
+    setTimeout(()=>fim(null),9000);
+  });
+}
+function distKm(a,b){ const R=6371, r=x=>x*Math.PI/180; const dLa=r(b.lat-a.lat), dLo=r(b.lng-a.lng); const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function locPerto(g){
+  if(!g) return null; let best=null, bd=1e9;
+  D.locais.forEach(l=>{ const la=Number(l.lat), ln=Number(l.lng); if(!la||!ln) return; const d=distKm(g,{lat:la,lng:ln}); if(d<bd){ bd=d; best=l; } });
+  return best && bd<=2? best : null;
+}
+async function aprendeLocal(l, g){
+  if(!l || !g || g.acc>500 || (Number(l.lat)&&Number(l.lng))) return;
+  await salvar("locais", l.id, Object.assign(strip(l),{lat:+g.lat.toFixed(5), lng:+g.lng.toFixed(5)}));
+}
+let regModo="";
+function abrirReg(modo){
+  regModo=modo||"";
+  $("regTit").textContent = modo==="entrega"? "🚚 Registrar entrega" : "🎙️ Registrar";
+  $("regTxt").placeholder = modo==="entrega"? "Ex.: Augusto, 2 galões de Barrier e 1 galão de Blue Star" : "Ex.: Fazenda do Dinho, levei peça pro Anderson e puxei os dados dos MPCs. Ficou de mandar a data da revisão.";
+  $("regTxt").value=""; $("regGps").textContent="📍 localizando…";
+  gpsP=pegaGPS(); gpsP.then(g=>{ const l=locPerto(g); $("regGps").textContent = !g? "" : l? "📍 Perto de "+l.nome : "📍 Localização registrada"; });
+  abrir("shLivre"); setTimeout(()=>$("regTxt").focus(),250);
+}
+async function registrarLivre(t){
+  const hj=ymd(new Date()); const data=dataPassada(t,new Date()); const hora = data===hj? nowHM() : "";
+  const ids=achaLocais(t); let l=ids.length? locById(ids[0]) : null;
+  const g=await Promise.race([gpsP||Promise.resolve(null), new Promise(r=>setTimeout(()=>r(gpsUlt),1500))]);
+  const perto=locPerto(g); if(!l && perto && data===hj) l=perto;
+  const its=itensEntrega(t); const msgs=[];
+  if(its.length && l){
+    await salvar("registros", uid(), {data, inicio:hora, fim:hora, localId:l.id, localNome:l.nome, localCidade:l.cidade||"", tipo:"entrega", feitos:["Entrega de produtos"], itens:its, descricao:txtItens(its), km:null, criadoEm:nowISO(), atualizadoEm:nowISO()});
+    msgs.push("🚚 Entrega em "+l.nome);
+  } else {
+    const o={data, texto:t.trim(), hora, criadoEm:nowISO(), atualizadoEm:nowISO()};
+    if(l){ o.localId=l.id; o.localNome=l.nome; }
+    if(g && data===hj){ o.lat=+g.lat.toFixed(5); o.lng=+g.lng.toFixed(5); }
+    await salvar("diario", uid(), o);
+    msgs.push("📖 No diário"+(l? " · "+l.nome:""));
+    if(its.length) msgs.push("não reconheci o cliente da entrega");
+  }
+  if(l && ehFazenda(l)){ const z=organizarLocal(t); const mL=[];
+    if(z.litros!=null && z.litros>=50){ await salvar("producao", l.id+"_"+data, {localId:l.id, data, litros:z.litros, atualizadoEm:nowISO()}); mL.push("🐄 "+fmtL(z.litros)); }
+    if(z.ccs!=null||z.cpp!=null){ const mm=mesAnterior(); const old=D.qualidade.find(q=>q.localId===l.id&&q.mes===mm);
+      await salvar("qualidade", l.id+"_"+mm, {localId:l.id, mes:mm, ccs: z.ccs!=null? z.ccs : (old?old.ccs:null), cbt: z.cpp!=null? z.cpp : (old?old.cbt:null), obs: old?(old.obs||""):"", atualizadoEm:nowISO()}); mL.push("🥛 CCS/CPP"); }
+    if(mL.length) msgs.push(mL.join(" · ")); }
+  const pds=achaPend(t);
+  for(const x of pds){ if(l) await salvar("pendencias", uid(), {localId:l.id, texto:x, feita:false, criadoEm:nowISO()}); else await salvar("notas", uid(), {texto:x, feito:false, criadoEm:nowISO()}); }
+  if(pds.length) msgs.push("📌 "+pds.length+" pendência"+(pds.length>1?"s":""));
+  toast("✓ "+msgs.join(" · "));
+}
+$("btnReg").onclick=()=>abrirReg();
+$("regSalvar").onclick=async()=>{
+  const t=$("regTxt").value.trim(); if(!t){ toast("Fale ou escreva o que fez"); return; }
+  $("regSalvar").disabled=true; try{ await registrarLivre(t); fechar("shLivre"); }catch(e){ toast("Não consegui guardar — tente de novo"); }
+  $("regSalvar").disabled=false;
+};
+
+/* ================= ENTREGAS ================= */
+const entregaDias = id => [...new Set(D.registros.filter(r=>r.localId===id && r.tipo==="entrega").map(r=>r.data))].sort();
+function previsao(l){
+  const ds=entregaDias(l.id); const ult=ds[ds.length-1]||null;
+  if(l.semPrevisao===true || l.semPrevisao==="true") return {ult, prox:null, off:true, n:ds.length};
+  if(ds.length<2) return {ult, prox:null, n:ds.length};
+  const iv=[]; for(let i=1;i<ds.length;i++) iv.push(Math.round((parseYmd(ds[i])-parseYmd(ds[i-1]))/864e5));
+  const us=iv.slice(-4).filter(x=>x>0); if(!us.length) return {ult, prox:null, n:ds.length};
+  const media=Math.round(us.reduce((a,b)=>a+b,0)/us.length);
+  const p=parseYmd(ult); p.setDate(p.getDate()+media);
+  return {ult, prox:ymd(p), media, n:ds.length};
+}
+function fimSemana(off){ const d=inicioSemana(off||0); d.setDate(d.getDate()+6); return ymd(d); }
+function entregasSemana(off){
+  off=off||0; const ini=ymd(inicioSemana(off)), fim=fimSemana(off), hj=ymd(new Date());
+  return D.locais.map(l=>({l, p:previsao(l)})).filter(x=>x.p.prox && x.p.prox<=fim && (off===0 || x.p.prox>=ini) && (off!==0 || !(x.p.ult>=ini && x.p.prox>fim))).map(x=>Object.assign(x,{atraso:x.p.prox<hj}));
+}
+const regiao = l => (l.cidade||"").replace(/\/.*$/,"").trim() || "Sem cidade";
+function grupos(lst){
+  const g={}; lst.forEach(x=>{ (g[regiao(x.l)] ||= []).push(x); });
+  return Object.entries(g).sort((a,b)=>b[1].length-a[1].length || a[0].localeCompare(b[0],"pt-BR")).map(([k,v])=>[k, v.sort((a,b)=>a.p.prox.localeCompare(b.p.prox))]);
+}
+function blocoSemana(titulo, lst){
+  if(!lst.length) return `<h2>${titulo}</h2><div class="card"><div class="empty">Nenhuma entrega prevista.</div></div>`;
+  return `<h2>${titulo} (${lst.length})</h2>` + grupos(lst).map(([reg,xs])=>`<div class="card" style="margin-bottom:10px">
+    <div class="jorline"><b class="grow">📍 ${esc(reg)}</b><span class="small muted">${xs.length>1? xs.length+" clientes · dá pra fazer no mesmo dia" : "1 cliente"}</span></div>
+    ${xs.map(x=>`<div class="jorline" data-ent="${esc(x.l.id)}" style="cursor:pointer"><span class="grow"><b>${esc(x.l.nome)}</b><br><span class="small muted">a cada ~${x.p.media} dias · última ${fmtData(x.p.ult)}</span></span>
+      <span class="small" style="text-align:right;white-space:nowrap;${x.atraso?"color:var(--danger);font-weight:700":""}">${x.atraso? "atrasada<br>era "+fmtData(x.p.prox) : "prevista<br>"+fmtData(x.p.prox)}</span></div>`).join("")}</div>`).join("");
+}
+function textoRoteiro(){
+  const a=entregasSemana(0), b=entregasSemana(1);
+  let t=`*ENTREGAS PREVISTAS*\n`;
+  [["Esta semana",a],["Semana que vem",b]].forEach(([n,l])=>{ t+=`\n*${n.toUpperCase()}*\n`; if(!l.length) t+="- nenhuma\n"; grupos(l).forEach(([reg,xs])=>{ t+=`${reg}:\n`; xs.forEach(x=>t+=`- ${x.l.nome} — ${x.atraso?"atrasada (era "+fmtData(x.p.prox)+")":fmtData(x.p.prox)}\n`); }); });
+  return t;
+}
+function renderEntregas(){
+  const a=entregasSemana(0), b=entregasSemana(1);
+  const clientes=D.locais.filter(l=>entregaDias(l.id).length).map(l=>({l,p:previsao(l)})).sort((x,y)=>(y.p.ult||"").localeCompare(x.p.ult||""));
+  const ult=ordenar(D.registros.filter(r=>r.tipo==="entrega")).reverse().slice(0,30);
+  let h=blocoSemana("Esta semana",a)+blocoSemana("Semana que vem",b);
+  h+=`<button class="btn soft block" id="entCopiar" style="margin-top:12px">📋 Copiar roteiro das entregas</button>`;
+  h+=`<h2>Clientes de entrega</h2><div class="card">`+(clientes.length? clientes.map(x=>`<div class="jorline"><span class="grow"><b>${esc(x.l.nome)}</b><br><span class="small muted">${x.p.n} entrega${x.p.n>1?"s":""} · última ${fmtData(x.p.ult)}${x.p.off? " · só registro" : x.p.prox? " · próxima "+fmtData(x.p.prox) : " · falta mais 1 entrega pra prever"}</span></span>
+      <button class="link small" data-prev="${esc(x.l.id)}" style="white-space:nowrap">${x.p.off? "ligar previsão" : "só registro"}</button></div>`).join("") : `<div class="empty">Nenhuma entrega registrada ainda.<br>Toque em <b>Registrar entrega</b> e fale, por ex.: “Augusto, 2 galões de Barrier”.</div>`)+`</div>`;
+  if(ult.length) h+=`<h2>Últimas entregas</h2><div class="card">`+ult.map(r=>`<div class="jorline" data-reg="${esc(r.id)}" style="cursor:pointer"><span class="grow"><b>${esc(localNome(r))}</b><br><span class="small muted">${esc(r.descricao||"Entrega de produtos")}</span></span><span class="small muted">${fmtData(r.data)}</span></div>`).join("")+`</div>`;
+  $("entConteudo").innerHTML=h;
+  $("entConteudo").querySelectorAll("[data-ent]").forEach(el=>el.onclick=()=>{ fazAtual=el.dataset.ent; irPara("fazendas"); });
+  $("entConteudo").querySelectorAll("[data-reg]").forEach(el=>el.onclick=()=>abrirRegistro(D.registros.find(r=>r.id===el.dataset.reg)));
+  $("entConteudo").querySelectorAll("[data-prev]").forEach(b=>b.onclick=()=>{ const l=locById(b.dataset.prev); if(!l) return; const off=!(l.semPrevisao===true||l.semPrevisao==="true");
+    salvar("locais", l.id, Object.assign(strip(l),{semPrevisao:off}), off? "Só registro: sem previsão para "+l.nome : "Previsão ligada para "+l.nome); });
+  $("entCopiar").onclick=async()=>{ try{ await navigator.clipboard.writeText(textoRoteiro()); toast("📋 Roteiro copiado"); }catch(e){ toast("Não consegui copiar"); } };
+}
+$("entReg").onclick=()=>abrirReg("entrega");
 
 /* ---- cores e herói ---- */
 function corDe(l){ if(!l) return 7; if(l.cor!=null && l.cor!=="") return +l.cor; let h=0; for(const c of String(l.id)) h=(h*31+c.charCodeAt(0))>>>0; return h%10; }
@@ -974,7 +1163,7 @@ function renderHeroi(it){
 
 function entryHTML(r, comSaida){
   const t=tipoInfo(r.tipo); const min=minutos(r.inicio,r.fim);
-  const hora = r.inicio ? (r.inicio + (r.fim? " – "+r.fim : "")) : "";
+  const hora = r.inicio ? (r.inicio + (r.fim&&r.fim!==r.inicio? " – "+r.fim : "")) : "";
   const cid = localCidade(r);
   const podeSair = comSaida && r.inicio && !r.fim && r.data===ymd(new Date());
   return `<div class="entry" data-id="${esc(r.id)}">
@@ -1018,6 +1207,7 @@ async function chegar(localId){
   const id=uid(), tipo=inferTipo(localId);
   const ok=await salvar("registros", id, {data:ymd(new Date()), inicio:nowHM(), fim:"", localId, localNome:l.nome, localCidade:l.cidade||"", tipo, feitos: tipo==="entrega"?["Entrega de produtos"]:[], descricao:"", km:null, criadoEm:nowISO(), atualizadoEm:nowISO()}, "✓ Chegada às "+nowHM()+" — "+l.nome);
   chegando=false;
+  if(ok && !(Number(l.lat)&&Number(l.lng))) pegaGPS().then(g=>aprendeLocal(locById(localId), g));
   if(ok && ehFazenda(l) && tipo!=="entrega") abrirChegada(id, {id, localId, tipo, inicio:nowHM(), data:ymd(new Date())});
 }
 const leiteJa = (localId, data) => ({ prod: D.producao.find(p=>p.localId===localId && p.data===data), q: D.qualidade.find(q=>q.localId===localId && q.mes===mesAnterior()) });
@@ -1139,7 +1329,7 @@ $("saiOrg").onclick=async()=>{
 /* ---- MAIS ---- */
 function renderMais(){
   const np=pendAbertas().length;
-  const it=[["diario","📖","Diário","Tudo o que você fez, com busca"],["fazendas","🏡","Fazendas",np? `${np} pendência${np>1?"s":""} · histórico e leite` : "Pendências, histórico e leite"],["semana","📊","Semana","Resumo e relatório"]];
+  const it=[["diario","📖","Diário","Tudo o que você fez, com busca"],["fazendas","🏡","Fazendas",np? `${np} pendência${np>1?"s":""} · histórico e leite` : "Pendências, histórico e leite"],["entregas","🚚","Entregas", (()=>{ const n=entregasSemana().length; return n? `${n} prevista${n>1?"s":""} esta semana` : "Previsões e rotas por região"; })()],["semana","📊","Semana","Resumo e relatório"]];
   $("maisLista").innerHTML=it.map(([v,ic,t,s])=>`<button class="frow" data-v="${v}" style="min-height:76px"><span style="font-size:26px">${ic}</span><span class="grow"><b>${t}</b><br><span class="s">${s}</span></span><span class="muted" style="font-size:22px">›</span></button>`).join("");
   $("maisLista").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="fazendas") fazAtual=null; irPara(b.dataset.v); });
 }
@@ -1524,7 +1714,7 @@ function semanaOffDe(s){ const a=inicioSemana(0), d=parseYmd(s); const dow=(d.ge
 const hmISO = iso => { const d=new Date(iso); return pad(d.getHours())+":"+pad(d.getMinutes()); };
 function itensDiario(){
   const it=[];
-  diarioTxt().forEach(x=>it.push({k:"dia", id:x.id, data:x.data, hora:"", ico:"📖", titulo:x.texto, sub:""}));
+  diarioTxt().forEach(x=>it.push({k:"dia", id:x.id, data:x.data, hora:x.hora||"", ico:"📖", titulo:x.texto, sub:x.localId? (locById(x.localId)||{nome:x.localNome||""}).nome : ""}));
   jornadas().forEach(j=>it.push({k:"jor", id:j.id, data:j.data, hora:j.inicio, ico:"⏱", titulo:"Jornada "+j.inicio+"–"+(j.fim||"…")+(jorMin(j)? " · "+fmtH(jorMin(j)) : ""), sub: j.fim? "" : "sem hora de término — toque para corrigir"}));
   D.registros.forEach(r=>{ const t=tipoInfo(r.tipo); const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:""):""; const c=localCidade(r);
     it.push({k:"reg", id:r.id, data:r.data, hora:r.inicio||"", ico:"📍", titulo:localNome(r)+" — "+t.n, sub:[[h,c].filter(Boolean).join(" · "), r.descricao || "✍️ toque para contar o que fez"].filter(Boolean).join("\n")}); });
@@ -1590,7 +1780,7 @@ $("dSalvar").onclick=async()=>{
   const t=$("dTxt").value.trim(); if(!t){ toast("Escreva o que você fez"); return; }
   const d=$("dData").value; if(!d){ toast("Escolha o dia"); return; }
   $("dSalvar").disabled=true;
-  const obj={data:d, texto:t, textoOriginal: editDia? (editDia.textoOriginal||"") : t, criadoEm: editDia? (editDia.criadoEm||nowISO()) : nowISO(), atualizadoEm:nowISO()};
+  const obj={...(editDia? strip(editDia) : {}), data:d, texto:t, textoOriginal: editDia? (editDia.textoOriginal||"") : t, criadoEm: editDia? (editDia.criadoEm||nowISO()) : nowISO(), atualizadoEm:nowISO()};
   if(await salvar("diario", editDia? editDia.id : uid(), obj, "📖 Guardado no diário")){
     if(diaNota){ await apagar("notas", diaNota); diaNota=null; }
     fechar("shDia");
@@ -1845,7 +2035,7 @@ function renderJorSemana(dias, keys){
   const js=keys.map(k=>jorDia(k)); const tot=js.reduce((s,j)=>s+jorMin(j),0); const nd=js.filter(Boolean).length;
   const loc=keys.reduce((s,k,i)=>s+(js[i]? emLocais(k):0),0);
   const m=jorMes(dias[3]);
-  if(!nd){ $("jorSemana").innerHTML=`<div class="empty">Nenhuma jornada registrada nesta semana.<br>Use o botão <b>▶️ Iniciar jornada</b> no Início.</div><div class="jorline"><span class="grow">Mês de ${esc(m.nome)}</span><b>${fmtH(m.min)}</b></div>`; return; }
+  if(!nd){ $("jorSemana").innerHTML=`<div class="empty">Nenhuma jornada registrada nesta semana.<br>Use o botão <b>▶️ Comecei o dia</b> no Início.</div><div class="jorline"><span class="grow">Mês de ${esc(m.nome)}</span><b>${fmtH(m.min)}</b></div>`; return; }
   const fora=Math.max(0, tot-loc);
   $("jorSemana").innerHTML=`<div class="jorline" style="padding-top:14px"><span class="grow"><b style="font-size:24px">${fmtH(tot)}</b><br><span class="small muted">na semana · ${nd} dia${nd>1?"s":""}</span></span>
       <span class="small muted" style="text-align:right">🏡 em locais ${fmtH(Math.min(loc,tot))}<br>🚗 deslocamento e outros ${fmtH(fora)}</span></div>`+
@@ -1867,15 +2057,17 @@ function gerarRelatorio(){
     t+=`\n*${d.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"}).toUpperCase()}*\n`;
     if(jd) t+=`⏱ Jornada: ${jd.inicio}–${jd.fim||"sem término"}${jd.fim? " ("+fmtH(jorMin(jd))+")" : ""}\n`;
     di.forEach(x=>{ t+=`- ${x.texto}\n`; });
-    rs.forEach(r=>{ const h=r.inicio? r.inicio+(r.fim?"–"+r.fim:"")+" ":""; const cid=localCidade(r);
+    rs.forEach(r=>{ const h=r.inicio? r.inicio+(r.fim&&r.fim!==r.inicio?"–"+r.fim:"")+" ":""; const cid=localCidade(r);
       t+=`- ${h}${localNome(r)}${cid?" ("+cid+")":""} — ${tipoInfo(r.tipo).n}\n`; if(r.feitos&&r.feitos.length) t+=`  ✓ ${r.feitos.join(", ")}\n`; if(r.descricao) t+=`  ${r.descricao.replace(/\n/g,"\n  ")}\n`; }); });
+  { const en=lst.filter(r=>r.tipo==="entrega"); if(en.length){ t+=`\n*ENTREGAS FEITAS (${en.length})*\n`; en.forEach(r=>t+=`- ${fmtData(r.data)} ${localNome(r)}${r.descricao? ": "+r.descricao.replace(/\n/g," ") : ""}\n`); } }
   const pw=D.producao.filter(p=>keys.includes(p.data));
   if(pw.length){ t+=`\n*PRODUÇÃO DE LEITE ANOTADA*\n`; pw.sort((a,b)=>a.data.localeCompare(b.data)).forEach(p=>{ const l=locById(p.localId); t+=`- ${l?l.nome:"?"}: ${fmtL(p.litros)} (${fmtData(p.data)})\n`; }); }
   const pend=pendAbertas();
   if(pend.length){ t+=`\n*PENDÊNCIAS EM ABERTO*\n`; pend.forEach(p=>{ const l=locById(p.localId); t+=`- ${l?l.nome+": ":""}${p.texto}\n`; }); }
   return t;
 }
-$("btnRel").onclick=()=>{ $("relTxt").textContent=gerarRelatorio(); $("btnCopiar").textContent="Copiar texto"; abrir("shRel"); };
+$("btnRel").onclick=()=>{ $("relTxt").textContent=gerarRelatorio(); $("btnCopiar").textContent="Copiar texto"; $("btnShare").classList.toggle("hidden", !navigator.share); abrir("shRel"); };
+$("btnShare").onclick=async()=>{ try{ await navigator.share({title:"Relatório da semana", text:$("relTxt").textContent}); }catch(e){} };
 $("btnCopiar").onclick=async()=>{
   try{ await navigator.clipboard.writeText($("relTxt").textContent); $("btnCopiar").textContent="Copiado ✓"; }
   catch(e){ const r=document.createRange(); r.selectNodeContents($("relTxt")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Texto selecionado — use Copiar do celular"); }
@@ -1893,7 +2085,7 @@ function badges(){
 }
 function render(){
   badges();
-  if(view==="inicio") renderInicio(); else if(view==="mais") renderMais(); else if(view==="agenda") renderAgenda(); else if(view==="anotar") renderAnotar(); else if(view==="diario") renderDiario(); else if(view==="fazendas") renderFazendas(); else renderSemana();
+  if(view==="inicio") renderInicio(); else if(view==="mais") renderMais(); else if(view==="agenda") renderAgenda(); else if(view==="anotar") renderAnotar(); else if(view==="diario") renderDiario(); else if(view==="fazendas") renderFazendas(); else if(view==="entregas") renderEntregas(); else renderSemana();
 }
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden) render(); });
 (async()=>{
